@@ -1,9 +1,9 @@
 import express from "express";
-import { login, refresh, logout } from "../controllers/user.controller.js";
+import { loginUserController, refresh, logout } from "../controllers/user.controller.js";
 
 const router = express.Router();
 
-router.post("/login", login);
+router.post("/login", loginUserController);
 router.post("/refresh", refresh);
 router.post("/logout", logout);
 

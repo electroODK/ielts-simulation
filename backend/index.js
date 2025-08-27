@@ -13,7 +13,8 @@ dotenv.config();
 const app = express();
 
 // ====== Middlewares ======
-app.use(cors({ origin: "http://localhost:5173", credentials: true })); // ⚡️ укажи фронт
+app.use(cors({ origin: "*"})); // ⚡️ укажи фронт
+
 app.use(express.json());
 
 // ====== Routes ======

@@ -1,0 +1,241 @@
+/* === AUTH MODAL STYLES === */
+.modalOverlay {
+   position: fixed;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100%;
+   background-color: rgba(0, 0, 0, 0.6);
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   z-index: 1000;
+   animation: fadeIn 0.3s ease;
+   padding: 16px; /* Добавляем отступы на случай очень маленьких экранов */
+   box-sizing: border-box;
+}
+
+@keyframes fadeIn {
+   from { opacity: 0; }
+   to { opacity: 1; }
+}
+
+.modalContent {
+   position: relative;
+   background: #fff;
+   border-radius: 16px;
+   padding: 32px;
+   width: 100%;
+   max-width: 450px;
+   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+   animation: scaleUp 0.3s ease;
+}
+
+@keyframes scaleUp {
+   from { transform: scale(0.9); opacity: 0; }
+   to { transform: scale(1); opacity: 1; }
+}
+
+.closeButton {
+   position: absolute;
+   top: 20px;
+   right: 20px;
+   background: none;
+   border: none;
+   cursor: pointer;
+   padding: 5px;
+   font-size: 28px;
+   line-height: 1;
+   color: #A0AEC0;
+}
+
+.tabs {
+   display: flex;
+   border-bottom: 1px solid #E2E8F0;
+   margin-bottom: 32px;
+}
+
+.tab {
+   flex: 1;
+   padding-bottom: 16px;
+   background: none;
+   border: none;
+   font-size: 16px;
+   font-weight: 600;
+   color: #64748B;
+   cursor: pointer;
+   border-bottom: 2px solid transparent;
+   margin-bottom: -1px; 
+   transition: all 0.2s ease;
+}
+
+.tab.activeTab {
+   color: #297FFF;
+   border-bottom-color: #297FFF;
+}
+
+.form {
+   display: flex;
+   flex-direction: column;
+}
+
+.formGroup {
+   margin-bottom: 20px;
+   text-align: left;
+}
+
+.formGroup label {
+   display: block;
+   font-size: 14px;
+   font-weight: 500;
+   margin-bottom: 8px;
+   color: #4A5568;
+}
+
+.formGroup input {
+   width: 100%;
+   padding: 14px 16px;
+   border: 1px solid #CBD5E0;
+   border-radius: 8px;
+   font-size: 16px;
+   box-sizing: border-box;
+   
+   /* Звиздец, хватит  меня использовать */
+   background-color: #ffffff; 
+   color: #1E293B;            
+ 
+}
+.formGroup input::placeholder {
+   color: #A0AEC0;
+}
+
+.passwordWrapper {
+   position: relative;
+}
+
+.passwordWrapper input {
+   padding-right: 45px;
+}
+
+.eyeButton {
+   position: absolute;
+   right: 12px;
+   top: 50%;
+   transform: translateY(-50%);
+   background: none;
+   border: none;
+   cursor: pointer;
+   display: flex;
+   align-items: center;
+   padding: 0;
+}
+
+.eyeButton img {
+   width: 24px;
+   height: 24px;
+}
+
+.submitButton {
+   margin-top: 12px;
+   padding: 16px;
+   background-color: #297FFF;
+   color: white;
+   border: none;
+   border-radius: 8px;
+   font-size: 16px;
+   font-weight: 600;
+   cursor: pointer;
+}
+.submitButton:hover {
+   background-color: #1c6eff;
+}
+
+.switchForm {
+   margin-top: 32px;
+   text-align: center;
+   font-size: 14px;
+   color: #64748B;
+}
+
+.switchForm button {
+   background: none;
+   border: none;
+   color: #297FFF;
+   font-weight: 600;
+   cursor: pointer;
+   padding: 0;
+   font-size: 14px;
+   text-decoration: underline;
+}
+
+.checkboxContainer input {
+   width: 16px;
+   height: 16px;
+   
+   /* === ДОБАВЛЕНО ДЛЯ ИСПРАВЛЕНИЯ === */
+   /* Сбрасываем внешний вид до системного */
+   appearance: none; 
+   -webkit-appearance: none;
+   -moz-appearance: none;
+   
+   /* Рисуем свою рамку */
+   border: 1px solid #CBD5E0;
+   border-radius: 4px;
+   
+   /* Позиционирование для галочки */
+   position: relative;
+   cursor: pointer;
+   outline: none;
+}
+
+/* Рисуем галочку, когда чекбокс выбран */
+.checkboxContainer input:checked::after {
+   content: '✔️'; /* Или можно использовать SVG-иконку */
+   font-size: 12px;
+   color: #297FFF; /* Цвет галочки */
+   position: absolute;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+}
+
+
+/* ================================== */
+/*        АДАПТИВНОСТЬ ДЛЯ МОБИЛЬНЫХ   */
+/* ================================== */
+
+@media (max-width: 480px) {
+   .modalContent {
+       padding: 24px; /* Уменьшаем внутренние отступы */
+   }
+
+   .closeButton {
+       top: 12px;
+       right: 12px;
+   }
+
+
+   .tabs {
+      margin-bottom: 24px;
+  }
+  
+  .tab {
+      font-size: 14px; /* Уменьшаем шрифт во вкладках */
+  }
+
+  .formGroup {
+      margin-bottom: 16px;
+  }
+
+  .formGroup input {
+      padding: 12px 14px; /* Уменьшаем инпуты */
+  }
+
+  .submitButton {
+      padding: 14px;
+  }
+
+  .switchForm {
+      margin-top: 24px;
+  }
+}

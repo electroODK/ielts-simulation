@@ -2,23 +2,18 @@
   "name": "backend",
   "version": "1.0.0",
   "main": "index.js",
-<<<<<<< HEAD
-=======
   "type": "module",
->>>>>>> 32da7d4043d9ce2efb53520eb657a8b77bbc50a7
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon index.js",
-    "start": "vite"
+    "start": "vite",
+    "user": "node adduser.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-<<<<<<< HEAD
-    "express": "^5.1.0",
-=======
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dcrypt": "^0.0.2",
@@ -26,7 +21,6 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.0",
->>>>>>> 32da7d4043d9ce2efb53520eb657a8b77bbc50a7
     "nodemon": "^3.1.10"
   }
 }

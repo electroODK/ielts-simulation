@@ -54,7 +54,7 @@ api.interceptors.response.use(
 // ======================
 // 👤 User login (без регистрации)
 export const loginUser = async (username, password) => {
-  const { data } = await api.post("/auth/user/login", { username, password });
+  const { data } = await api.post("/api/auth/login", { username, password });
   localStorage.setItem("access_token", data.accessToken);
   localStorage.setItem("refresh_token", data.refreshToken);
   return data;

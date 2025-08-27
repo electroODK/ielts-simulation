@@ -3,9 +3,7 @@ import bcrypt from 'bcrypt';
 import User from '../models/user.model.js';
 
 // controllers/auth.controller.js
-import bcrypt from "bcrypt";
-import User from "../models/user.model.js";
-import { generateAccessToken, generateRefreshToken } from "../utils/jwt.js";
+
 
 export const loginUserController = async (req, res) => {
   try {

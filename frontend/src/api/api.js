@@ -5,7 +5,7 @@ const API_URL = "http://localhost:1488/api"; // адрес бэкенда
 // 🔧 экземпляр axios
 const api = axios.create({
   baseURL: API_URL,
-  withCredentials: true, // если используешь cookies
+  withCredentials: true,  
 });
 
 // ⬆️ interceptor для accessToken

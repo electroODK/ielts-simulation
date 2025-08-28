@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(cuid())
+  username     String        @unique
+  role         Role
+  passwordHash String?
+  createdAt    DateTime      @default(now())
+  assignments  Assignment[]
+  submissions  Submission[]
+}
+
+enum Role {
+  user
+  admin
+}
+
+model Test {
+  id          String     @id @default(cuid())
+  title       String
+  type        TestType
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  questions   Question[]
+  assignments Assignment[]
+}
+
+enum TestType {
+  listening
+  reading
+  speaking
+  writing
+}
+
+model Question {
+  id        String   @id @default(cuid())
+  testId    String
+  test      Test     @relation(fields: [testId], references: [id])
+  part      Int?
+  kind      QuestionKind
+  prompt    String
+  options   String[]
+  answerKey String?
+}
+
+enum QuestionKind {
+  text
+  mcq
+}
+
+model Assignment {
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+  testId    String
+  test      Test        @relation(fields: [testId], references: [id])
+  status    AssignStatus @default(assigned)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  submissions Submission[]
+}
+
+enum AssignStatus {
+  assigned
+  in_progress
+  submitted
+  graded
+}
+
+model Submission {
+  id           String     @id @default(cuid())
+  assignmentId String
+  assignment   Assignment @relation(fields: [assignmentId], references: [id])
+  answers      Json
+  createdAt    DateTime   @default(now())
+  result       Result?
+}
+
+model Result {
+  id            String     @id @default(cuid())
+  submissionId  String     @unique
+  submission    Submission @relation(fields: [submissionId], references: [id])
+  part1Score    Float?
+  part2Score    Float?
+  overallScore  Float?
+  comments      String?
+  createdAt     DateTime   @default(now())
+}

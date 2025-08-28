@@ -116,3 +116,68 @@ export const submitListeningAnswers = async (req, res) => {
   }
 };
 
+export const submitReadingAnswers = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    const { testId, answers } = req.body || {};
+    if (!testId || !Array.isArray(answers)) {
+      return res.status(400).json({ message: "testId and answers are required" });
+    }
+
+    const test = await Test.findById(testId);
+    if (!test) return res.status(404).json({ message: "Test not found" });
+
+    const flatQuestions = [];
+    (test.readingPassages || []).forEach((rp) => {
+      (rp.questions || []).forEach((q) => flatQuestions.push(q));
+    });
+    const questionsById = new Map(flatQuestions.map((q) => [String(q.id || q._id), q]));
+
+    let correct = 0;
+    for (const a of answers) {
+      const q = questionsById.get(String(a.questionId));
+      if (!q) continue;
+      const type = q.type;
+      const right = q.correctAnswer;
+      const given = a.answer;
+      if (type === 'mcq' || type === 'tf' || type === 'short') {
+        const r = String(right || '').trim().toLowerCase();
+        const g = String(given || '').trim().toLowerCase();
+        if (r && g && r === g) correct += 1;
+      } else if (type === 'multi') {
+        const rset = new Set((right || []).map((v)=>String(v).toLowerCase()));
+        const gset = new Set((Array.isArray(given) ? given : []).map((v)=>String(v).toLowerCase()));
+        if (rset.size === gset.size && [...rset].every((v)=>gset.has(v))) correct += 1;
+      } else if (type === 'gap_text') {
+        const rObj = right || {};
+        const gObj = given || {};
+        const allKeys = Object.keys(rObj);
+        const allCorrect = allKeys.length > 0 && allKeys.every((k)=>{
+          const r = String(rObj[k] || '').trim().toLowerCase();
+          const g = String(gObj[k] || '').trim().toLowerCase();
+          return r && g && r === g;
+        });
+        if (allCorrect) correct += 1;
+      }
+    }
+
+    const total = flatQuestions.length || 1;
+    const band = Math.round(((correct / total) * 9) * 2) / 2;
+
+    let result = await Result.findOne({ user: userId, test: testId });
+    if (!result) {
+      result = await Result.create({ user: userId, test: testId, reading: { band }, status: "submitted" });
+    } else {
+      result.reading = { ...(result.reading || {}), band };
+      if (result.status === "submitted") {
+        result.status = "reviewing";
+      }
+      await result.save();
+    }
+
+    return res.json({ correct, total, band, resultId: result._id });
+  } catch (e) {
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+

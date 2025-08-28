@@ -57,7 +57,13 @@ export const getTestPublic = async (req, res) => {
       duration: p.duration,
       questions: sanitizeTypedQuestions(p.questions),
     })),
-    // reading can be added similarly when needed
+    readingPassages: (test.readingPassages || []).map((rp) => ({
+      index: rp.index,
+      title: rp.title,
+      // content nodes without answers
+      content: (rp.content || []).map((n) => n.type === 'gap' ? { type: 'gap', id: n.id } : n),
+      questions: sanitizeTypedQuestions(rp.questions),
+    })),
   };
   return res.json(payload);
 };

@@ -2,9 +2,11 @@
 
 import React from "react";
 import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const EndPage = ({ userId }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const idFromState = location?.state?.userId;
   const effectiveUserId = idFromState || userId || "";
   return (
@@ -30,6 +32,7 @@ const EndPage = ({ userId }) => {
             Telegram Channel
           </a>
         </p>
+        <button onClick={()=>navigate('/')} className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Go Home</button>
       </div>
     </div>
   );

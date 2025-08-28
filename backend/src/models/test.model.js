@@ -24,10 +24,18 @@ const listeningPartSchema = new mongoose.Schema({
   questions: [typedQuestionSchema],
 }, { _id: false });
 
+const readingPassageSchema = new mongoose.Schema({
+  index: { type: Number, required: true },
+  title: { type: String, default: "" },
+  content: [{ type: mongoose.Schema.Types.Mixed }],
+  questions: [typedQuestionSchema],
+}, { _id: false });
+
 const testSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String, default: "" },
   reading: [questionSchema],
+  readingPassages: [readingPassageSchema],
   listening: [questionSchema],
   listeningParts: [listeningPartSchema],
   listeningAudioUrl: { type: String, default: "" },

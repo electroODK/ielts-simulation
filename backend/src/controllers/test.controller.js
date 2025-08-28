@@ -33,15 +33,30 @@ export const getTestPublic = async (req, res) => {
   const test = await Test.findById(testId);
   if (!test) return res.status(404).json({ message: "Test not found" });
 
-  const sanitizeQuestions = (questions) =>
+  const sanitizeSimpleQuestions = (questions) =>
     questions.map((q) => ({ id: q._id, prompt: q.prompt, options: q.options || [] }));
+
+  const sanitizeTypedQuestions = (questions) =>
+    (questions || []).map((q) => ({
+      id: q.id || q._id,
+      type: q.type,
+      prompt: q.prompt,
+      options: q.options || [],
+      content: q.content || [],
+    }));
 
   const payload = {
     id: test._id,
     name: test.name,
     description: test.description,
     listeningAudioUrl: test.listeningAudioUrl || "",
-    listening: sanitizeQuestions(test.listening || []),
+    listening: sanitizeSimpleQuestions(test.listening || []),
+    listeningParts: (test.listeningParts || []).map((p) => ({
+      index: p.index,
+      audioUrl: p.audioUrl,
+      duration: p.duration,
+      questions: sanitizeTypedQuestions(p.questions),
+    })),
     // reading can be added similarly when needed
   };
   return res.json(payload);

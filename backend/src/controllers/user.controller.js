@@ -10,9 +10,9 @@ export const loginUserController = async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    if (!username || !password) {
+    if (!username) {
       return res.status(400).json({
-        message: "Username and password are required",
+        message: "Username is required",
         error: true,
         success: false,
       });
@@ -28,15 +28,25 @@ export const loginUserController = async (req, res) => {
       });
     }
 
-    // сверяем пароль
-    const isPasswordMatch = await bcrypt.compare(password, user.password);
-    if (!isPasswordMatch) {
-      await new Promise((resolve) => setTimeout(resolve, 500)); // защита от брутфорса
-      return res.status(401).json({
-        message: "Invalid credentials",
-        error: true,
-        success: false,
-      });
+    // Политика: для admin/checkers пароль обязателен; для user пароль опционален
+    const isPrivileged = ["admin", "speaking-checker", "writing-checker"].includes(user.role);
+    if (isPrivileged) {
+      if (!password) {
+        return res.status(400).json({ message: "Password is required" });
+      }
+      const isPasswordMatch = await bcrypt.compare(password, user.password);
+      if (!isPasswordMatch) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        return res.status(401).json({ message: "Invalid credentials", error: true, success: false });
+      }
+    } else {
+      if (password) {
+        const isPasswordMatch = await bcrypt.compare(password, user.password);
+        if (!isPasswordMatch) {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          return res.status(401).json({ message: "Invalid credentials", error: true, success: false });
+        }
+      }
     }
 
     // генерируем токены

@@ -76,14 +76,13 @@ const Login = () => {
           </div>
 
           <div className={styles.formGroup}>
-            <label>Пароль*</label>
+            <label>Пароль (для админов/проверяющих)</label>
             <div className={styles.passwordWrapper}>
               <input
                 type={showPassword ? "text" : "password"}
-                placeholder="Введите пароль"
+                placeholder="Оставьте пустым, если вы пользователь"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
               />
               <button
                 type="button"

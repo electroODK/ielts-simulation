@@ -22,8 +22,9 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    const isRefreshCall = originalRequest?.url?.includes('/auth/refresh-token');
+    const hasRt = !!localStorage.getItem('refresh_token');
+    if (error.response?.status === 401 && !originalRequest._retry && !isRefreshCall && hasRt) {
       originalRequest._retry = true;
 
       try {
@@ -40,7 +41,7 @@ api.interceptors.response.use(
         console.error("❌ Ошибка обновления токена:", err);
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
-        window.location.href = "/"; // редирект на логин
+        if (!isRefreshCall) window.location.href = "/"; // редирект на логин
       }
     }
 

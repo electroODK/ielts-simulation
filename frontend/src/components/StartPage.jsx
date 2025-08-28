@@ -20,12 +20,19 @@ const StartPage = () => {
     setTimeout(async () => {
       try {
         const a = await getMyAssignment();
-        sessionStorage.setItem('assignment', JSON.stringify(a));
-        const listeningId = a?.listeningTest?._id || id;
-        navigate(`/exam/listening/${listeningId}`);
+        if (a) {
+          sessionStorage.setItem('assignment', JSON.stringify(a));
+          const listeningId = a?.listeningTest?._id;
+          if (listeningId) {
+            navigate(`/exam/listening/${listeningId}`);
+            return;
+          }
+        }
       } catch (e) {
-        navigate(`/exam/listening/${id}`);
+        // ignore
       }
+      // fallback: остаёмся на стартовой или идём на listening только если id задан админом в ссылке
+      if (id && id !== 'start') navigate(`/exam/listening/${id}`);
     }, 5000);
   };
 

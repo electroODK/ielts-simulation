@@ -45,8 +45,8 @@ const Login = () => {
         navigate("/checker/speaking");
       } else if (role === "writing-checker") {
         navigate("/checker/writing");
-      } else if (redirect) {
-        navigate("/endpage", { state: { userId: user?.id } });
+      } else if (role === "user") {
+        navigate(`/exam/start/${user?.id || 'start'}`);
       } else {
         // notest: остаёмся на странице или показываем уведомление
       }

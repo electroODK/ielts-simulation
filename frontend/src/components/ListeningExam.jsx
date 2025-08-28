@@ -95,6 +95,14 @@ const ListeningExam = () => {
       }, 300);
     } else {
       // last part ended: auto-submit
+      // navigate to Reading using assignment if available
+      try {
+        const a = JSON.parse(sessionStorage.getItem('assignment') || 'null');
+        if (a?.readingTest?._id) {
+          navigate(`/exam/reading/${a.readingTest._id}`);
+          return;
+        }
+      } catch {}
       handleSubmit();
     }
   };

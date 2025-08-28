@@ -181,3 +181,26 @@ export const submitReadingAnswers = async (req, res) => {
   }
 };
 
+export const submitWriting = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    const { testId, task1Text, task2Text, task1ImageRef } = req.body || {};
+    if (!testId) return res.status(400).json({ message: "testId is required" });
+    let result = await Result.findOne({ user: userId, test: testId });
+    if (!result) {
+      result = await Result.create({ user: userId, test: testId, status: "submitted" });
+    }
+    result.writingSubmission = {
+      ...(result.writingSubmission || {}),
+      task1Text: task1Text || result.writingSubmission?.task1Text || "",
+      task2Text: task2Text || result.writingSubmission?.task2Text || "",
+      task1ImageRef: task1ImageRef || result.writingSubmission?.task1ImageRef || "",
+    };
+    if (result.status === "submitted") result.status = "reviewing";
+    await result.save();
+    return res.json({ ok: true, resultId: result._id });
+  } catch (e) {
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+

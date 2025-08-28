@@ -20,6 +20,7 @@ const StartPage = () => {
     setTimeout(async () => {
       try {
         const a = await getMyAssignment();
+        sessionStorage.setItem('assignment', JSON.stringify(a));
         const listeningId = a?.listeningTest?._id || id;
         navigate(`/exam/listening/${listeningId}`);
       } catch (e) {

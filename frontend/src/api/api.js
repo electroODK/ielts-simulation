@@ -163,6 +163,16 @@ export const submitReading = async (payload) => {
   return data;
 };
 
+export const submitWriting = async (payload) => {
+  const { data } = await api.post("/results/submit-writing", payload);
+  return data;
+};
+
+export const uploadSpeakingRecording = async (formData) => {
+  const { data } = await api.post("/speaking/upload", formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+  return data;
+};
+
 // ======================
 // ASSIGNMENTS (admin + user)
 // ======================

@@ -1,6 +1,6 @@
 import express from "express";
 import { authenticate, authorize } from "../middleware/auth.js";
-import { submitResult, listResults, listResultsByUser, updateResult, finalizeResult, publishResult, submitListeningAnswers, submitReadingAnswers } from "../controllers/result.controller.js";
+import { submitResult, listResults, listResultsByUser, updateResult, finalizeResult, publishResult, submitListeningAnswers, submitReadingAnswers, submitWriting } from "../controllers/result.controller.js";
 
 const router = express.Router();
 
@@ -8,6 +8,7 @@ const router = express.Router();
 router.post("/submit", authenticate, authorize("user"), submitResult);
 router.post("/submit-listening", authenticate, authorize("user"), submitListeningAnswers);
 router.post("/submit-reading", authenticate, authorize("user"), submitReadingAnswers);
+router.post("/submit-writing", authenticate, authorize("user"), submitWriting);
 
 // admin lists
 router.get("/", authenticate, authorize("admin", "speaking-checker", "writing-checker"), listResults);

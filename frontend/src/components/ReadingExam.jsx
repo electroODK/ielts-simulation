@@ -141,6 +141,13 @@ const ReadingExam = () => {
         answers: Object.entries(answers).map(([questionId, answer]) => ({ questionId, answer })),
       };
       const res = await submitReading(payload);
+      try {
+        const a = JSON.parse(sessionStorage.getItem('assignment') || 'null');
+        if (a?.writingTest?._id) {
+          navigate(`/exam/writing/${a.writingTest._id}`);
+          return;
+        }
+      } catch {}
       navigate('/endpage');
     } catch (e) {
     } finally {

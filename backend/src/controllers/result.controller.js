@@ -1,4 +1,5 @@
 import Result from "../models/result.model.js";
+import { sendResultToChannel, formatResultMessage } from "../integrations/telegram.js";
 
 export const submitResult = async (req, res) => {
   try {
@@ -64,6 +65,13 @@ export const publishResult = async (req, res) => {
   if (!result) return res.status(404).json({ message: "Result not found" });
   result.status = "published";
   await result.save();
+  try {
+    const populated = await result.populate(["user", "test"]);
+    const message = formatResultMessage(populated);
+    await sendResultToChannel(message);
+  } catch (e) {
+    // ignore if telegram not configured
+  }
   return res.json(result);
 };
 

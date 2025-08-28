@@ -11,6 +11,7 @@ const testSchema = new mongoose.Schema({
   description: { type: String, default: "" },
   reading: [questionSchema],
   listening: [questionSchema],
+  listeningAudioUrl: { type: String, default: "" },
   writingTasks: [{ type: String }],
   speakingTopics: [{ type: String }],
 }, { timestamps: true });

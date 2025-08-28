@@ -1,11 +1,12 @@
 import express from "express";
 import { authenticate, authorize } from "../middleware/auth.js";
-import { submitResult, listResults, listResultsByUser, updateResult, finalizeResult, publishResult } from "../controllers/result.controller.js";
+import { submitResult, listResults, listResultsByUser, updateResult, finalizeResult, publishResult, submitListeningAnswers } from "../controllers/result.controller.js";
 
 const router = express.Router();
 
 // user submit
 router.post("/submit", authenticate, authorize("user"), submitResult);
+router.post("/submit-listening", authenticate, authorize("user"), submitListeningAnswers);
 
 // admin lists
 router.get("/", authenticate, authorize("admin", "speaking-checker", "writing-checker"), listResults);

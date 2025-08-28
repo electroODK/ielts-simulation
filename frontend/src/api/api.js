@@ -105,6 +105,11 @@ export const getTestById = async (id) => {
   return data;
 };
 
+export const getListeningTestPublic = async (id) => {
+  const { data } = await api.get(`/tests/${id}/public`);
+  return data;
+};
+
 // назначить тест юзеру
 export const assignTestToUser = async (userId, testId) => {
   const { data } = await api.post(`/tests/assign`, { userId, testId });
@@ -140,6 +145,11 @@ export const getUserById = async (id) => {
 // отправить ответы (юзер)
 export const submitResult = async (resultData) => {
   const { data } = await api.post("/results/submit", resultData);
+  return data;
+};
+
+export const submitListening = async (payload) => {
+  const { data } = await api.post("/results/submit-listening", payload);
   return data;
 };
 

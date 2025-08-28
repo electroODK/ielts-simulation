@@ -1,4 +1,5 @@
 import Result from "../models/result.model.js";
+import Test from "../models/test.model.js";
 import { sendResultToChannel, formatResultMessage } from "../integrations/telegram.js";
 
 export const submitResult = async (req, res) => {
@@ -73,5 +74,45 @@ export const publishResult = async (req, res) => {
     // ignore if telegram not configured
   }
   return res.json(result);
+};
+
+export const submitListeningAnswers = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    const { testId, answers } = req.body || {};
+    if (!testId || !Array.isArray(answers)) {
+      return res.status(400).json({ message: "testId and answers are required" });
+    }
+
+    const test = await Test.findById(testId);
+    if (!test) return res.status(404).json({ message: "Test not found" });
+
+    const questionsById = new Map(test.listening.map((q) => [String(q._id), q]));
+    let correct = 0;
+    for (const a of answers) {
+      const q = questionsById.get(String(a.questionId));
+      if (!q) continue;
+      const correctAnswer = (q.correctAnswer || "").trim().toLowerCase();
+      const given = String(a.answer ?? "").trim().toLowerCase();
+      if (correctAnswer && given && correctAnswer === given) correct += 1;
+    }
+    const total = test.listening.length || 1;
+    const band = Math.round(((correct / total) * 9) * 2) / 2; // half-band rounding
+
+    let result = await Result.findOne({ user: userId, test: testId });
+    if (!result) {
+      result = await Result.create({ user: userId, test: testId, listening: { band }, status: "submitted" });
+    } else {
+      result.listening = { ...(result.listening || {}), band };
+      if (result.status === "submitted") {
+        result.status = "reviewing";
+      }
+      await result.save();
+    }
+
+    return res.json({ correct, total, band, resultId: result._id });
+  } catch (e) {
+    return res.status(500).json({ message: "Server error" });
+  }
 };
 

@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from './components/AuthContext';
 import AdminPanel from './components/AdminPanel';
 import SpeakingCheckerPanel from './components/SpeakingCheckerPanel';
 import WritingCheckerPanel from './components/WritingCheckerPanel';
+import ListeningExam from './components/ListeningExam';
 
 const ProtectedRoute = ({ children, allow }) => {
   const { isLoggedIn, user } = useAuth();
@@ -25,6 +26,11 @@ const App = () => {
         <Route path='/admin' element={
           <ProtectedRoute allow={["admin"]}>
             <AdminPanel />
+          </ProtectedRoute>
+        }/>
+        <Route path='/exam/listening/:id' element={
+          <ProtectedRoute allow={["user", "admin"]}>
+            <ListeningExam />
           </ProtectedRoute>
         }/>
         <Route path='/checker/speaking' element={

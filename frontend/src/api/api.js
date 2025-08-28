@@ -163,6 +163,24 @@ export const submitReading = async (payload) => {
   return data;
 };
 
+// ======================
+// ASSIGNMENTS (admin + user)
+// ======================
+export const createAssignment = async ({ userId, listeningTestId, readingTestId, writingTestId, speakingTestId }) => {
+  const { data } = await api.post("/assignments", { userId, listeningTestId, readingTestId, writingTestId, speakingTestId });
+  return data;
+};
+
+export const listAssignments = async () => {
+  const { data } = await api.get("/assignments");
+  return data;
+};
+
+export const getMyAssignment = async () => {
+  const { data } = await api.get("/assignments/me");
+  return data;
+};
+
 // получить результаты юзера
 export const getUserResults = async (userId) => {
   const { data } = await api.get(`/results/user/${userId}`);

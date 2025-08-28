@@ -6,6 +6,7 @@ import router from "./src/routes/user.routes.js";
 import testsRouter from "./src/routes/test.routes.js";
 import resultsRouter from "./src/routes/result.routes.js";
 import usersAdminRouter from "./src/routes/user.admin.routes.js";
+import assignmentsRouter from "./src/routes/assignment.routes.js";
 import cookieParser from "cookie-parser";
 
 // import userRoutes from "./routes/users.js";
@@ -27,6 +28,7 @@ app.use("/api/auth", router);
 app.use("/api/tests", testsRouter);
 app.use("/api/results", resultsRouter);
 app.use("/api/users", usersAdminRouter);
+app.use("/api/assignments", assignmentsRouter);
 
 // ====== DB Connection ======
 const PORT = process.env.PORT || 1488;

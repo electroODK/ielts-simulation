@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { getMyAssignment } from "../api/api";
 
 const StartPage = () => {
   const navigate = useNavigate();
@@ -13,11 +14,17 @@ const StartPage = () => {
     return () => clearTimeout(t);
   }, [countdown]);
 
-  const handleStart = () => {
+  const handleStart = async () => {
     if (!checked) return;
     setCountdown(5);
-    setTimeout(() => {
-      navigate(`/exam/listening/${id}`);
+    setTimeout(async () => {
+      try {
+        const a = await getMyAssignment();
+        const listeningId = a?.listeningTest?._id || id;
+        navigate(`/exam/listening/${listeningId}`);
+      } catch (e) {
+        navigate(`/exam/listening/${id}`);
+      }
     }, 5000);
   };
 

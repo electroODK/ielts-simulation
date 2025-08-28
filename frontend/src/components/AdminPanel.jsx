@@ -1,23 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { getUsers, createUser } from "../api/api";
 import { getTests, createTest, assignTestToUser } from "../api/api";
+import { createAssignment, listAssignments } from "../api/api";
 import { getAllResults, updateResult, finalizeResult, publishResult } from "../api/api";
 
 const AdminPanel = () => {
   const [users, setUsers] = useState([]);
   const [tests, setTests] = useState([]);
   const [results, setResults] = useState([]);
+  const [assignments, setAssignments] = useState([]);
 
   const [newUser, setNewUser] = useState({ username: "", password: "", role: "user" });
   const [newTest, setNewTest] = useState({ name: "", description: "" });
   const [assign, setAssign] = useState({ userId: "", testId: "" });
+  const [assign4, setAssign4] = useState({ userId: "", listeningTestId: "", readingTestId: "", writingTestId: "", speakingTestId: "" });
 
   const load = async () => {
     try {
-      const [u, t, r] = await Promise.all([getUsers(), getTests(), getAllResults()]);
+      const [u, t, r, a] = await Promise.all([getUsers(), getTests(), getAllResults(), listAssignments()]);
       setUsers(u);
       setTests(t);
       setResults(r);
+      setAssignments(a);
     } catch (e) {}
   };
 
@@ -46,6 +50,13 @@ const AdminPanel = () => {
 
   const handleUpdateResult = async (id, payload) => {
     await updateResult(id, payload);
+    load();
+  };
+
+  const handleCreateAssignment = async (e) => {
+    e.preventDefault();
+    await createAssignment(assign4);
+    setAssign4({ userId: "", listeningTestId: "", readingTestId: "", writingTestId: "", speakingTestId: "" });
     load();
   };
 
@@ -90,6 +101,45 @@ const AdminPanel = () => {
           </select>
           <button type="submit">Assign</button>
         </form>
+      </section>
+
+      <section>
+        <h2>Assign 4 sections to user</h2>
+        <form onSubmit={handleCreateAssignment}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+            <select value={assign4.userId} onChange={(e)=>setAssign4(v=>({...v, userId:e.target.value}))}>
+              <option value="">Select user</option>
+              {users.map(u=> <option key={u._id} value={u._id}>{u.username}</option>)}
+            </select>
+            <select value={assign4.listeningTestId} onChange={(e)=>setAssign4(v=>({...v, listeningTestId:e.target.value}))}>
+              <option value="">Listening test</option>
+              {tests.map(t=> <option key={t._id} value={t._id}>{t.name}</option>)}
+            </select>
+            <select value={assign4.readingTestId} onChange={(e)=>setAssign4(v=>({...v, readingTestId:e.target.value}))}>
+              <option value="">Reading test</option>
+              {tests.map(t=> <option key={t._id} value={t._id}>{t.name}</option>)}
+            </select>
+            <select value={assign4.writingTestId} onChange={(e)=>setAssign4(v=>({...v, writingTestId:e.target.value}))}>
+              <option value="">Writing test</option>
+              {tests.map(t=> <option key={t._id} value={t._id}>{t.name}</option>)}
+            </select>
+            <select value={assign4.speakingTestId} onChange={(e)=>setAssign4(v=>({...v, speakingTestId:e.target.value}))}>
+              <option value="">Speaking test</option>
+              {tests.map(t=> <option key={t._id} value={t._id}>{t.name}</option>)}
+            </select>
+          </div>
+          <button type="submit" style={{ marginTop: 8 }}>Create Assignment</button>
+        </form>
+        <div style={{ marginTop: 12 }}>
+          <h3>Assignments</h3>
+          <ul>
+            {assignments.map(a => (
+              <li key={a._id}>
+                {a.user?.username}: L={a.listeningTest?.name} | R={a.readingTest?.name} | W={a.writingTest?.name} | S={a.speakingTest?.name}
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
 
       <section>

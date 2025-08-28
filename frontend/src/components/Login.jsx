@@ -29,7 +29,7 @@ const Login = () => {
       const res = await loginApi(username, password);
       // console.log("успех", res);
 
-      const { accessToken, refreshToken, user, role } = res;
+      const { accessToken, refreshToken, user, role, redirect } = res;
 
       // сохраняем токены
       localStorage.setItem("access_token", accessToken);
@@ -45,8 +45,10 @@ const Login = () => {
         navigate("/checker/speaking");
       } else if (role === "writing-checker") {
         navigate("/checker/writing");
-      } else {
+      } else if (redirect) {
         navigate("/endpage", { state: { userId: user?.id } });
+      } else {
+        // notest: остаёмся на странице или показываем уведомление
       }
     } catch (err) {
       setError(err.response?.data?.message || "Ошибка входа");

@@ -28,23 +28,6 @@ export const loginUserController = async (req, res) => {
       });
     }
 
-    // если статус "notest" → не редиректим
-    if (user.status === "notest") {
-      return res.status(200).json({
-        message: "User has not passed the test yet",
-        error: false,
-        success: true,
-        data: {
-          user: {
-            id: user._id,
-            username: user.username,
-            status: user.status,
-          },
-          redirect: false, // фронт проверяет этот флаг
-        },
-      });
-    }
-
     // сверяем пароль
     const isPasswordMatch = await bcrypt.compare(password, user.password);
     if (!isPasswordMatch) {
@@ -131,12 +114,14 @@ export const loginAdminController = async (req, res) => {
     user.last_login_date = new Date();
     await user.save();
 
+    const shouldRedirect = user.status !== "notest";
     return res.status(200).json({
       accessToken,
       refreshToken,
-      user: { id: user._id, username: user.username, role: user.role },
+      user: { id: user._id, username: user.username, role: user.role, status: user.status },
       role: user.role,
-      redirect: true,
+      redirect: shouldRedirect,
+      message: shouldRedirect ? "Login successful" : "User has not passed the test yet",
     });
   } catch (error) {
     return res.status(500).json({ message: "Internal server error" });
@@ -144,29 +129,24 @@ export const loginAdminController = async (req, res) => {
 };
 
 export const refresh = async (req, res) => {
-  const { refreshToken } = req.body;
+  const { refreshToken } = req.body || {};
   if (!refreshToken) return res.status(401).json({ message: 'No refresh token' });
 
+  const user = await User.findOne({ refresh_token: refreshToken });
+  if (!user) return res.status(403).json({ message: 'Invalid refresh token' });
+
   try {
-    const user = await User.findOne({ refresh_token: refreshToken });
-    if (!user) return res.status(403).json({ message: 'Invalid refresh token' });
-
-    try {
-      const decoded = verifyRefreshToken(refreshToken);
-      const newAccessToken = generateAccessToken({ id: user._id, role: user.role, username: user.username });
-      const newRefreshToken = generateRefreshToken({ id: user._id, role: user.role, username: user.username });
-
-      user.access_token = newAccessToken;
-      user.refresh_token = newRefreshToken;
-      await user.save();
-
-      return res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
-    } catch (err) {
-      return res.status(403).json({ message: 'Invalid refresh token' });
-    }
-  } catch (err) {
-    return res.status(500).json({ message: 'Server error' });
+    verifyRefreshToken(refreshToken);
+  } catch {
+    return res.status(403).json({ message: 'Invalid refresh token' });
   }
+
+  const newAccessToken = generateAccessToken({ id: user._id, role: user.role, username: user.username });
+  const newRefreshToken = generateRefreshToken({ id: user._id, role: user.role, username: user.username });
+  user.access_token = newAccessToken;
+  user.refresh_token = newRefreshToken;
+  await user.save();
+  return res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
 };
 
 export const logout = async (req, res) => {

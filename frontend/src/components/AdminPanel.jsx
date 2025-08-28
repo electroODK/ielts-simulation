@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getUsers, createUser } from "../api/api";
 import { getTests, createTest, assignTestToUser } from "../api/api";
 import { createAssignment, listAssignments } from "../api/api";
+import api from "../api/api";
 import { getAllResults, updateResult, finalizeResult, publishResult } from "../api/api";
 
 const AdminPanel = () => {
@@ -86,6 +87,12 @@ const AdminPanel = () => {
           <input placeholder="description" value={newTest.description} onChange={(e)=>setNewTest(v=>({...v, description:e.target.value}))} />
           <button type="submit">Create</button>
         </form>
+        <div style={{ marginTop: 8 }}>
+          <form onSubmit={async (e)=>{ e.preventDefault(); const file = e.currentTarget.pdf.files[0]; if (!file) return; const form = new FormData(); form.append('pdf', file); await api.post('/tests/upload-pdf', form, { headers: { 'Content-Type': 'multipart/form-data' } }); alert('PDF uploaded'); }}>
+            <input type="file" name="pdf" accept="application/pdf" />
+            <button type="submit">Upload PDF</button>
+          </form>
+        </div>
       </section>
 
       <section>

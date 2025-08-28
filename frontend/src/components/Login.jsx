@@ -75,7 +75,27 @@ const Login = () => {
             />
           </div>
 
-          {/* Пароль убран из пользовательского логина */}
+          <div className={styles.formGroup}>
+            <label>Пароль</label>
+            <div className={styles.passwordWrapper}>
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Введите пароль (для user можно оставить пустым)"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className={styles.eyeButton}
+              >
+                <img
+                  src={showPassword ? OpenEye : CloseEye}
+                  alt="Toggle password visibility"
+                />
+              </button>
+            </div>
+          </div>
 
           {error && (
             <p style={{ color: "red", textAlign: "center" }}>{error}</p>

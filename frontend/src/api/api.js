@@ -162,5 +162,17 @@ export const getAllResults = async () => {
    return data;
  };
  
+ // финализировать результат
+ export const finalizeResult = async (id) => {
+   const { data } = await api.post(`/results/${id}/finalize`);
+   return data;
+ };
+ 
+ // опубликовать результат
+ export const publishResult = async (id) => {
+   const { data } = await api.post(`/results/${id}/publish`);
+   return data;
+ };
+ 
  export default api;
  

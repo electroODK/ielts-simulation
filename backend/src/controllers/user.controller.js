@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import User from '../models/user.model.js';
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../utils/jwt.js";
 
 // controllers/auth.controller.js
 
@@ -56,8 +57,8 @@ export const loginUserController = async (req, res) => {
     }
 
     // генерируем токены
-    const accessToken = await generateAccessToken({ id: user._id });
-    const refreshToken = await generateRefreshToken({ id: user._id });
+    const accessToken = generateAccessToken({ id: user._id, role: user.role, username: user.username });
+    const refreshToken = generateRefreshToken({ id: user._id, role: user.role, username: user.username });
 
     // сохраняем токены в БД
     user.access_token = accessToken;
@@ -79,6 +80,7 @@ export const loginUserController = async (req, res) => {
       id: user._id,
       username: user.username,
       status: user.status,
+      role: user.role,
       last_login_date: user.last_login_date,
     };
 
@@ -86,13 +88,11 @@ export const loginUserController = async (req, res) => {
       message: "Login successful",
       error: false,
       success: true,
-      data: {
-        accessToken,
-        refreshToken,
-        user: userResponse,
-        role: user.role,
-        redirect: true,
-      },
+      accessToken,
+      refreshToken,
+      user: userResponse,
+      role: user.role,
+      redirect: true,
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -104,42 +104,85 @@ export const loginUserController = async (req, res) => {
   }
 };
 
+export const loginAdminController = async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({ message: "Username and password are required" });
+    }
+
+    const user = await User.findOne({ username });
+    if (!user || user.role !== "admin") {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    if (!isPasswordMatch) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const accessToken = generateAccessToken({ id: user._id, role: user.role, username: user.username });
+    const refreshToken = generateRefreshToken({ id: user._id, role: user.role, username: user.username });
+
+    user.access_token = accessToken;
+    user.refresh_token = refreshToken;
+    user.last_login_date = new Date();
+    await user.save();
+
+    return res.status(200).json({
+      accessToken,
+      refreshToken,
+      user: { id: user._id, username: user.username, role: user.role },
+      role: user.role,
+      redirect: true,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export const refresh = async (req, res) => {
-  const token = req.cookies.refreshToken;
-  if (!token) return res.status(401).json({ msg: 'No refresh token' });
+  const { refreshToken } = req.body;
+  if (!refreshToken) return res.status(401).json({ message: 'No refresh token' });
 
   try {
-    const user = await User.findOne({ where: { refreshToken: token } });
-    if (!user) return res.status(403).json({ msg: 'Invalid refresh token' });
+    const user = await User.findOne({ refresh_token: refreshToken });
+    if (!user) return res.status(403).json({ message: 'Invalid refresh token' });
 
-    jwt.verify(token, process.env.REFRESH_SECRET, (err, decoded) => {
-      if (err) return res.status(403).json({ msg: 'Invalid refresh token' });
+    try {
+      const decoded = verifyRefreshToken(refreshToken);
+      const newAccessToken = generateAccessToken({ id: user._id, role: user.role, username: user.username });
+      const newRefreshToken = generateRefreshToken({ id: user._id, role: user.role, username: user.username });
 
-      const accessToken = jwt.sign(
-        { id: user.id, username: user.username },
-        process.env.ACCESS_SECRET,
-        { expiresIn: '15m' }
-      );
+      user.access_token = newAccessToken;
+      user.refresh_token = newRefreshToken;
+      await user.save();
 
-      res.json({ accessToken });
-    });
+      return res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
+    } catch (err) {
+      return res.status(403).json({ message: 'Invalid refresh token' });
+    }
   } catch (err) {
-    res.status(500).json({ msg: 'Server error' });
+    return res.status(500).json({ message: 'Server error' });
   }
 };
 
 export const logout = async (req, res) => {
-  const token = req.cookies.refreshToken;
-  if (!token) return res.sendStatus(204);
-
   try {
-    const user = await User.findOne({ where: { refreshToken: token } });
+    const authHeader = req.headers.authorization || "";
+    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+    if (!token) return res.sendStatus(204);
+
+    const user = await User.findOne({ access_token: token });
     if (!user) return res.sendStatus(204);
 
-    await User.update({ refreshToken: null }, { where: { id: user.id } });
-    res.clearCookie('refreshToken');
-    res.json({ msg: 'Logged out' });
+    user.access_token = "";
+    user.refresh_token = "";
+    await user.save();
+    return res.json({ message: 'Logged out' });
   } catch (err) {
-    res.status(500).json({ msg: 'Server error' });
+    return res.status(500).json({ message: 'Server error' });
   }
 };

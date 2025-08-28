@@ -1,6 +1,7 @@
 // src/pages/Login.jsx
 
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "../components/Auth.module.css";
 import OpenEye from "../assets/photo_2025-08-26_16-50-52.jpg";
 import CloseEye from "../assets/photo_2025-08-26_16-51-10.jpg";
@@ -9,6 +10,7 @@ import { useAuth } from "../components/AuthContext";
 
 const Login = () => {
   const { login } = useAuth(); // ⚡️ берём login из AuthContext
+  const navigate = useNavigate();
 
   const [username, setUsername] = useState(""); // теперь username
   const [password, setPassword] = useState("");
@@ -36,7 +38,16 @@ const Login = () => {
       // обновляем глобальный AuthContext
       login(accessToken, role);
 
-      console.log("Успешный вход:", user);
+      // role-based redirect
+      if (role === "admin") {
+        navigate("/admin");
+      } else if (role === "speaking-checker") {
+        navigate("/checker/speaking");
+      } else if (role === "writing-checker") {
+        navigate("/checker/writing");
+      } else {
+        navigate("/endpage", { state: { userId: user?.id } });
+      }
     } catch (err) {
       setError(err.response?.data?.message || "Ошибка входа");
     } finally {

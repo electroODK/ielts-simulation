@@ -16,14 +16,19 @@ const createUser = async () => {
 
     console.log("✅ Connected to MongoDB");
 
-    // Хэшируем пароль
-    const hash = await bcrypt.hash("12345", 10);
+    // Проверяем, существует ли уже админ
+    const existingAdmin = await User.findOne({ username: "admin" });
+    if (existingAdmin) {
+      console.log("ℹ️ Admin already exists:", existingAdmin.username);
+    } else {
+      // Хэшируем пароль
+      const hash = await bcrypt.hash("12345", 10);
 
-    // Создаём пользователя
-    const user = new User({ username: "admin", password: hash });
-    await user.save();
-
-    console.log("✅ User created:", user.username);
+      // Создаём администратора
+      const adminUser = new User({ username: "admin", password: hash, role: "admin", status: "ready" });
+      await adminUser.save();
+      console.log("✅ Admin user created:", adminUser.username);
+    }
   } catch (err) {
     console.error("❌ Error creating user:", err.message);
   } finally {

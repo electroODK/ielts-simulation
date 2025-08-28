@@ -3,12 +3,12 @@ import React, { createContext, useState, useContext, useEffect } from "react";
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // { id, name, role, token }
+  const [user, setUser] = useState(null); // { token, role, name }
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Загружаем данные из localStorage при старте
-    const token = localStorage.getItem("authToken");
+    const token = localStorage.getItem("access_token");
     const role = localStorage.getItem("role");
     const name = localStorage.getItem("name");
 
@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (token, role, name) => {
-    localStorage.setItem("authToken", token);
+    localStorage.setItem("access_token", token);
     localStorage.setItem("role", role);
     localStorage.setItem("name", name);
 
@@ -27,7 +27,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem("authToken");
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
     localStorage.removeItem("role");
     localStorage.removeItem("name");
 
@@ -35,16 +36,18 @@ export const AuthProvider = ({ children }) => {
   };
 
   const isLoggedIn = !!user;
-  const isStudent = user?.role === "student";
-  const isTeacher = user?.role === "teacher";
+  const isUser = user?.role === "user";
   const isAdmin = user?.role === "admin";
+  const isSpeakingChecker = user?.role === "speaking-checker";
+  const isWritingChecker = user?.role === "writing-checker";
 
   const value = {
     user,
     isLoggedIn,
-    isStudent,
-    isTeacher,
+    isUser,
     isAdmin,
+    isSpeakingChecker,
+    isWritingChecker,
     login,
     logout,
     loading,

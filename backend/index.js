@@ -3,6 +3,10 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
 import router from "./src/routes/user.routes.js";
+import testsRouter from "./src/routes/test.routes.js";
+import resultsRouter from "./src/routes/result.routes.js";
+import usersAdminRouter from "./src/routes/user.admin.routes.js";
+import cookieParser from "cookie-parser";
 
 // import userRoutes from "./routes/users.js";
 // import testRoutes from "./routes/tests.js";
@@ -16,12 +20,13 @@ const app = express();
 app.use(cors({ origin: "http://localhost:5173", credentials: true })); // ⚡️ укажи фронт
 
 app.use(express.json());
+app.use(cookieParser());
 
 // ====== Routes ======
 app.use("/api/auth", router);
-// app.use("/api/users", userRoutes);
-// app.use("/api/tests", testRoutes);
-// app.use("/api/results", resultRoutes);
+app.use("/api/tests", testsRouter);
+app.use("/api/results", resultsRouter);
+app.use("/api/users", usersAdminRouter);
 
 // ====== DB Connection ======
 const PORT = process.env.PORT || 1488;

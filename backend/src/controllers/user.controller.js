@@ -32,7 +32,8 @@ export const loginUserController = async (req, res) => {
     const isPrivileged = ["admin", "speaking-checker", "writing-checker"].includes(user.role);
     if (isPrivileged) {
       if (!password) {
-        return res.status(400).json({ message: "Password is required" });
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        return res.status(401).json({ message: "Invalid credentials" });
       }
       const isPasswordMatch = await bcrypt.compare(password, user.password);
       if (!isPasswordMatch) {

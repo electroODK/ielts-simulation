@@ -11,6 +11,7 @@ import ReadingExam from './components/ReadingExam';
 import StartPage from './components/StartPage';
 import WritingExam from './components/WritingExam';
 import SpeakingExam from './components/SpeakingExam';
+import AdminLogin from './components/AdminLogin';
 
 const ProtectedRoute = ({ children, allow }) => {
   const { isLoggedIn, user } = useAuth();
@@ -26,6 +27,7 @@ const App = () => {
     <AuthProvider>
       <Routes>
         <Route path='/' element={<Login/>}/>
+        <Route path='/admin/login' element={<AdminLogin/>}/>
         <Route path='/endpage' element={<EndPage/>}/>
         <Route path='/admin' element={
           <ProtectedRoute allow={["admin"]}>

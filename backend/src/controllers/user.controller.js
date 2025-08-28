@@ -4,14 +4,13 @@ import User from '../models/user.model.js';
 
 // controllers/auth.controller.js
 
-
 export const loginUserController = async (req, res) => {
   try {
     const { username, password } = req.body;
 
     if (!username || !password) {
       return res.status(400).json({
-        message: "Username and password are required",
+        message: 'Username and password are required',
         error: true,
         success: false,
       });
@@ -19,18 +18,23 @@ export const loginUserController = async (req, res) => {
 
     // ищем пользователя
     const user = await User.findOne({ username });
+
+    if (!user) {
+      user = await AdminModel.findOne({ username });
+      role = 'admin';
+    }
     if (!user) {
       return res.status(401).json({
-        message: "Invalid credentials",
+        message: 'Invalid credentials',
         error: true,
         success: false,
       });
     }
 
     // если статус "notest" → не редиректим
-    if (user.status === "notest") {
+    if (user.status === 'notest') {
       return res.status(200).json({
-        message: "User has not passed the test yet",
+        message: 'User has not passed the test yet',
         error: false,
         success: true,
         data: {
@@ -49,7 +53,7 @@ export const loginUserController = async (req, res) => {
     if (!isPasswordMatch) {
       await new Promise((resolve) => setTimeout(resolve, 500)); // защита от брутфорса
       return res.status(401).json({
-        message: "Invalid credentials",
+        message: 'Invalid credentials',
         error: true,
         success: false,
       });
@@ -67,13 +71,13 @@ export const loginUserController = async (req, res) => {
 
     const cookiesOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     };
 
-    res.cookie("accessToken", accessToken, cookiesOptions);
-    res.cookie("refreshToken", refreshToken, cookiesOptions);
+    res.cookie('accessToken', accessToken, cookiesOptions);
+    res.cookie('refreshToken', refreshToken, cookiesOptions);
 
     const userResponse = {
       id: user._id,
@@ -83,7 +87,7 @@ export const loginUserController = async (req, res) => {
     };
 
     return res.status(200).json({
-      message: "Login successful",
+      message: 'Login successful',
       error: false,
       success: true,
       data: {
@@ -95,9 +99,9 @@ export const loginUserController = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Login error:", error);
+    console.error('Login error:', error);
     return res.status(500).json({
-      message: "Internal server error",
+      message: 'Internal server error',
       error: true,
       success: false,
     });

@@ -103,8 +103,16 @@ export const createTest = async (testData) => {
 
 // получить список всех тестов
 export const getTests = async () => {
-  const { data } = await api.get('/tests');
-  return data;
+  try {
+    const { data } = await api.get("/tests");
+    return data;
+  } catch (error) {
+    if (error.response?.status === 403) {
+      console.warn('Access denied: User not authorized to view tests');
+      return [];
+    }
+    throw error;
+  }
 };
 
 // получить конкретный тест (+ populate секции)
@@ -141,14 +149,30 @@ export const createUser = async (userData) => {
 
 // получить список юзеров
 export const getUsers = async () => {
-  const { data } = await api.get('/users');
-  return data;
+  try {
+    const { data } = await api.get("/users");
+    return data;
+  } catch (error) {
+    if (error.response?.status === 403) {
+      console.warn('Access denied: User not authorized to view users list');
+      return [];
+    }
+    throw error;
+  }
 };
 
 // получить инфо о юзере
 export const getUserById = async (id) => {
-  const { data } = await api.get(`/users/${id}`);
-  return data;
+  try {
+    const { data } = await api.get(`/users/${id}`);
+    return data;
+  } catch (error) {
+    if (error.response?.status === 403) {
+      console.warn('Access denied: User not authorized to view user details');
+      return null;
+    }
+    throw error;
+  }
 };
 
 //
@@ -204,8 +228,16 @@ export const createAssignment = async ({
 };
 
 export const listAssignments = async () => {
-  const { data } = await api.get('/assignments');
-  return data;
+  try {
+    const { data } = await api.get("/assignments");
+    return data;
+  } catch (error) {
+    if (error.response?.status === 403) {
+      console.warn('Access denied: User not authorized to view assignments');
+      return [];
+    }
+    throw error;
+  }
 };
 
 export const getMyAssignment = async () => {
@@ -221,26 +253,35 @@ export const getUserResults = async (userId) => {
 
 // получить все результаты (админ)
 export const getAllResults = async () => {
-  const { data } = await api.get('/results');
-  return data;
-};
-
-// обновить результат (оценка/фидбек)
-export const updateResult = async (id, updateData) => {
-  const { data } = await api.patch(`/results/${id}`, updateData);
-  return data;
-};
-
-// финализировать результат
-export const finalizeResult = async (id) => {
-  const { data } = await api.post(`/results/${id}/finalize`);
-  return data;
-};
-
-// опубликовать результат
-export const publishResult = async (id) => {
-  const { data } = await api.post(`/results/${id}/publish`);
-  return data;
-};
-
-export default api;
+   try {
+     const { data } = await api.get("/results");
+     return data;
+   } catch (error) {
+     if (error.response?.status === 403) {
+       console.warn('Access denied: User not authorized to view results');
+       return [];
+     }
+     throw error;
+   }
+ };
+ 
+ // обновить результат (оценка/фидбек)
+ export const updateResult = async (id, updateData) => {
+   const { data } = await api.patch(`/results/${id}`, updateData);
+   return data;
+ };
+ 
+ // финализировать результат
+ export const finalizeResult = async (id) => {
+   const { data } = await api.post(`/results/${id}/finalize`);
+   return data;
+ };
+ 
+ // опубликовать результат
+ export const publishResult = async (id) => {
+   const { data } = await api.post(`/results/${id}/publish`);
+   return data;
+ };
+ 
+ export default api;
+ 

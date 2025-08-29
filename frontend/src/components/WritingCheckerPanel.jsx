@@ -12,7 +12,9 @@ const WritingCheckerPanel = () => {
     try {
       const [r, u] = await Promise.all([getAllResults(), getUsers()]);
       setResults(r);
-      setUsers(u);
+      // Фильтруем только обычных пользователей (не админов)
+      const regularUsers = u.filter(user => user.role === 'user');
+      setUsers(regularUsers);
     } catch (error) {
       console.error('Error loading data:', error);
     }

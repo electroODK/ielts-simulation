@@ -1,6 +1,6 @@
 import express from "express";
 import { authenticate, authorize } from "../middleware/auth.js";
-import { createTest, listTests, getTest, assignTest, getTestPublic } from "../controllers/test.controller.js";
+import { createTest, listTests, getTest, assignTest, getTestPublic, updateTest, deleteTest } from "../controllers/test.controller.js";
 import multer from "multer";
 import path from "path";
 
@@ -9,6 +9,8 @@ const router = express.Router();
 router.post("/", authenticate, authorize("admin"), createTest);
 router.get("/", authenticate, authorize("admin"), listTests);
 router.get("/:id", authenticate, authorize("admin", "speaking-checker", "writing-checker"), getTest);
+router.put("/:id", authenticate, authorize("admin"), updateTest);
+router.delete("/:id", authenticate, authorize("admin"), deleteTest);
 router.get("/:id/public", authenticate, authorize("user", "admin"), getTestPublic);
 router.post("/assign", authenticate, authorize("admin"), assignTest);
 

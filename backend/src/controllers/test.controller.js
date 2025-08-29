@@ -83,3 +83,23 @@ export const assignTest = async (req, res) => {
   return res.json({ message: "Assigned" });
 };
 
+export const updateTest = async (req, res) => {
+  try {
+    const updated = await Test.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updated) return res.status(404).json({ message: 'Test not found' });
+    return res.json(updated);
+  } catch (e) {
+    return res.status(400).json({ message: e.message });
+  }
+};
+
+export const deleteTest = async (req, res) => {
+  try {
+    const deleted = await Test.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ message: 'Test not found' });
+    return res.status(204).send();
+  } catch (e) {
+    return res.status(400).json({ message: e.message });
+  }
+};
+

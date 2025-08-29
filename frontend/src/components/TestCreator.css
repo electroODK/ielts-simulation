@@ -146,6 +146,21 @@
   margin: 10px 0;
 }
 
+.block-actions,
+.section-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.btn-danger {
+  background: #e74c3c;
+}
+
+.btn-danger:hover {
+  background: #c0392b;
+}
+
 .block-editor {
   background: white;
   padding: 15px;

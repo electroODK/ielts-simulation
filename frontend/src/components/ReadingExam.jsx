@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getReadingTestPublic, submitReading } from "../api/api";
+import TemplateRenderer from "./TemplateRenderer";
 
 const formatTime = (sec) => {
   const m = Math.floor(sec / 60).toString().padStart(2, '0');
@@ -107,25 +108,8 @@ const ReadingExam = () => {
         {(q.type === 'short' || !q.type) && (
           <input type="text" value={answers[q.id] || ''} onChange={(e)=>handleChange(q.id, e.target.value)} placeholder="Your answer" />
         )}
-        {q.type === 'gap_text' && Array.isArray(q.content) && (
-          <div style={{ lineHeight: 1.8 }}>
-            {q.content.map((node, i) => {
-              if (node.type === 'text') return <span key={i}>{node.value}</span>;
-              if (node.type === 'gap') {
-                const key = `${q.id}:${node.id}`;
-                return (
-                  <input
-                    key={i}
-                    type="text"
-                    value={answers[key] || ''}
-                    onChange={(e)=>handleChange(key, e.target.value)}
-                    style={{ width: 120, margin: '0 6px' }}
-                  />
-                );
-              }
-              return null;
-            })}
-          </div>
+        {q.type === 'gap_text' && typeof q.prompt === 'string' && (
+          <TemplateRenderer template={q.prompt} questionId={q.id} answers={answers} onChange={handleChange} />
         )}
       </div>
     );

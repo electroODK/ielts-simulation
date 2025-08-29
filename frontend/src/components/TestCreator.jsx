@@ -11,6 +11,7 @@ const TestCreator = () => {
 
   const [currentSection, setCurrentSection] = useState(null);
   const [currentBlock, setCurrentBlock] = useState(null);
+  const [activeTab, setActiveTab] = useState('listening');
 
   // Добавить новую секцию
   const addSection = (sectionType) => {
@@ -27,6 +28,19 @@ const TestCreator = () => {
           { index: 2, audioUrl: '', duration: 0, questions: [] },
           { index: 3, audioUrl: '', duration: 0, questions: [] },
           { index: 4, audioUrl: '', duration: 0, questions: [] }
+        ],
+        blocks: []
+      };
+    } else if (sectionType === 'reading') {
+      // Для Reading создаем 3 части с текстом по умолчанию
+      newSection = {
+        type: sectionType,
+        title: '',
+        durationSec: 0,
+        readingParts: [
+          { index: 1, passageTitle: '', passageText: '', questions: [] },
+          { index: 2, passageTitle: '', passageText: '', questions: [] },
+          { index: 3, passageTitle: '', passageText: '', questions: [] }
         ],
         blocks: []
       };
@@ -103,6 +117,21 @@ const TestCreator = () => {
         ? {
             ...section,
             audioParts: section.audioParts.map((part, pIndex) =>
+              pIndex === partIndex ? { ...part, [field]: value } : part
+            )
+          }
+        : section
+    );
+    setTestData(prev => ({ ...prev, sections: updatedSections }));
+  };
+
+  // Обновить данные readingPart
+  const updateReadingPart = (sectionIndex, partIndex, field, value) => {
+    const updatedSections = testData.sections.map((section, sIndex) =>
+      sIndex === sectionIndex
+        ? {
+            ...section,
+            readingParts: section.readingParts.map((part, pIndex) =>
               pIndex === partIndex ? { ...part, [field]: value } : part
             )
           }
@@ -241,6 +270,51 @@ const TestCreator = () => {
     setTestData(prev => ({ ...prev, sections: updatedSections }));
   };
 
+  // Добавить вопрос в readingPart
+  const addQuestionToReadingPart = (sectionIndex, partIndex, questionType) => {
+    // Используем те же типы, что и для Listening
+    return addQuestionToAudioPart(sectionIndex, partIndex, questionType, true);
+  };
+
+  // Обновить вопрос в readingPart
+  const updateQuestionInReadingPart = (sectionIndex, partIndex, questionIndex, field, value) => {
+    const updatedSections = testData.sections.map((section, sIndex) =>
+      sIndex === sectionIndex
+        ? {
+            ...section,
+            readingParts: section.readingParts.map((part, pIndex) =>
+              pIndex === partIndex
+                ? {
+                    ...part,
+                    questions: part.questions.map((question, qIndex) =>
+                      qIndex === questionIndex ? { ...question, [field]: value } : question
+                    )
+                  }
+                : part
+            )
+          }
+        : section
+    );
+    setTestData(prev => ({ ...prev, sections: updatedSections }));
+  };
+
+  // Удалить вопрос из readingPart
+  const deleteQuestionFromReadingPart = (sectionIndex, partIndex, questionIndex) => {
+    const updatedSections = testData.sections.map((section, sIndex) =>
+      sIndex === sectionIndex
+        ? {
+            ...section,
+            readingParts: section.readingParts.map((part, pIndex) =>
+              pIndex === partIndex
+                ? { ...part, questions: part.questions.filter((_, qIndex) => qIndex !== questionIndex) }
+                : part
+            )
+          }
+        : section
+    );
+    setTestData(prev => ({ ...prev, sections: updatedSections }));
+  };
+
   // Добавить вопрос в блок
   const addQuestion = (sectionIndex, blockIndex) => {
     const newQuestion = {
@@ -351,6 +425,21 @@ const TestCreator = () => {
         const total = perPartCounts.reduce((a, b) => a + b, 0);
         if (total > 40) {
           alert('В Listening суммарно не больше 40 вопросов.');
+          return;
+        }
+      }
+
+      // Валидация: Reading лимиты (3 части, по 15 максимум, всего 40)
+      const readingSections = testData.sections.filter(s => s.type === 'reading');
+      for (const s of readingSections) {
+        const perPartCounts = (s.readingParts || []).map(p => countQuestionsInPart(p));
+        if (perPartCounts.some(c => c > 15)) {
+          alert('В каждой части Reading не должно быть больше 15 вопросов.');
+          return;
+        }
+        const total = perPartCounts.reduce((a, b) => a + b, 0);
+        if (total > 40) {
+          alert('В Reading суммарно не больше 40 вопросов.');
           return;
         }
       }
@@ -1035,14 +1124,19 @@ const TestCreator = () => {
 
       <div className="sections-creator">
         <h2>Секции теста</h2>
-        <div className="section-types">
-          <button onClick={() => addSection('listening')}>Listening</button>
-          <button onClick={() => addSection('reading')}>Reading</button>
-          <button onClick={() => addSection('writing')}>Writing</button>
-          <button onClick={() => addSection('speaking')}>Speaking</button>
+        <div className="tabs">
+          <button className={`tab ${activeTab === 'listening' ? 'active' : ''}`} onClick={() => setActiveTab('listening')}>Listening</button>
+          <button className={`tab ${activeTab === 'reading' ? 'active' : ''}`} onClick={() => setActiveTab('reading')}>Reading</button>
+          <button className={`tab ${activeTab === 'writing' ? 'active' : ''}`} onClick={() => setActiveTab('writing')}>Writing</button>
+          <button className={`tab ${activeTab === 'speaking' ? 'active' : ''}`} onClick={() => setActiveTab('speaking')}>Speaking</button>
+        </div>
+        <div className="tab-actions">
+          <button onClick={() => addSection(activeTab)}>Добавить секцию {activeTab}</button>
         </div>
 
-        {testData.sections.map((section, sectionIndex) => (
+        {testData.sections
+          .filter(section => section.type === activeTab)
+          .map((section, sectionIndex) => (
           <div key={sectionIndex} className="section-editor">
             <h3>Секция: {section.type}</h3>
             <div className="section-actions">
@@ -1130,6 +1224,85 @@ const TestCreator = () => {
                             <span className="question-type">{question.type.toUpperCase()}</span>
                             <span className="question-number">Вопрос {questionIndex + 1}</span>
                             <button className="btn-danger" onClick={() => deleteQuestionFromAudioPart(sectionIndex, partIndex, questionIndex)}>Удалить</button>
+                          </div>
+                          {renderQuestionEditor(sectionIndex, partIndex, questionIndex, question)}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : section.type === 'reading' ? (
+              <div className="reading-parts-creator">
+                <h4>Пассажи для чтения (3 части, максимум 40 вопросов всего)</h4>
+                {(() => {
+                  const totalQuestions = (section.readingParts || []).reduce((sum, part) => sum + countQuestionsInPart(part), 0);
+                  return (
+                    <div className="total-questions-summary">
+                      <span>Всего вопросов: {totalQuestions}/40</span>
+                      {totalQuestions > 40 && (
+                        <span className="warning">⚠️ Превышен общий лимит вопросов!</span>
+                      )}
+                    </div>
+                  );
+                })()}
+                {(section.readingParts || []).map((part, partIndex) => (
+                  <div key={partIndex} className="reading-part-container">
+                    <h5>Часть {part.index}</h5>
+                    <div className="reading-part-info">
+                      <input
+                        placeholder="Заголовок пассажа"
+                        value={part.passageTitle}
+                        onChange={(e) => updateReadingPart(sectionIndex, partIndex, 'passageTitle', e.target.value)}
+                      />
+                      <textarea
+                        placeholder="Текст пассажа"
+                        rows={6}
+                        value={part.passageText}
+                        onChange={(e) => updateReadingPart(sectionIndex, partIndex, 'passageText', e.target.value)}
+                      />
+                      <input
+                        type="file"
+                        accept=".txt"
+                        onChange={(e) => {
+                          const file = e.target.files && e.target.files[0];
+                          if (!file) return;
+                          const reader = new FileReader();
+                          reader.onload = () => {
+                            updateReadingPart(sectionIndex, partIndex, 'passageText', reader.result || '');
+                          };
+                          reader.readAsText(file);
+                        }}
+                      />
+                    </div>
+                    {(() => {
+                      const partCount = countQuestionsInPart(part);
+                      return (
+                        <div className="questions-summary">
+                          <span>Вопросов: {partCount}/15</span>
+                          {partCount > 15 && (
+                            <span className="warning">⚠️ Превышен лимит вопросов!</span>
+                          )}
+                        </div>
+                      );
+                    })()}
+
+                    <div className="question-types">
+                      <button onClick={() => addQuestionToReadingPart(sectionIndex, partIndex, 'mcq')}>Multiple Choice</button>
+                      <button onClick={() => addQuestionToReadingPart(sectionIndex, partIndex, 'tfng')}>True/False/Not Given</button>
+                      <button onClick={() => addQuestionToReadingPart(sectionIndex, partIndex, 'matching')}>Matching</button>
+                      <button onClick={() => addQuestionToReadingPart(sectionIndex, partIndex, 'table')}>Table</button>
+                      <button onClick={() => addQuestionToReadingPart(sectionIndex, partIndex, 'gap')}>Gap Fill</button>
+                      <button onClick={() => addQuestionToReadingPart(sectionIndex, partIndex, 'short')}>Short Answer</button>
+                    </div>
+
+                    <div className="questions-list">
+                      {part.questions.map((question, questionIndex) => (
+                        <div key={questionIndex} className="question-container">
+                          <div className="question-header">
+                            <span className="question-type">{question.type.toUpperCase()}</span>
+                            <span className="question-number">Вопрос {questionIndex + 1}</span>
+                            <button className="btn-danger" onClick={() => deleteQuestionFromReadingPart(sectionIndex, partIndex, questionIndex)}>Удалить</button>
                           </div>
                           {renderQuestionEditor(sectionIndex, partIndex, questionIndex, question)}
                         </div>

@@ -43,6 +43,9 @@ const blockSchema = new mongoose.Schema({
       "table_block",
       "gap_text_block",
       "gap_table_block",
+      "writing_part1",
+      "writing_part2",
+      "speaking_questions",
     ],
     required: true,
   },
@@ -60,6 +63,10 @@ const blockSchema = new mongoose.Schema({
   gapText: { type: mongoose.Schema.Types.Mixed },
   // For gap_table: { columns: [String], rows: [String], templateCells: [[String|null]] }
   gapTable: { type: mongoose.Schema.Types.Mixed },
+  // Writing specifics: { imageUrl?: string, prompt: string }
+  writing: { type: mongoose.Schema.Types.Mixed },
+  // Speaking specifics: { questions: [string] }
+  speaking: { type: mongoose.Schema.Types.Mixed },
 }, { _id: false, strict: false });
 
 const testSectionSchema = new mongoose.Schema({

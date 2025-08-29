@@ -47,10 +47,8 @@ const TestCreator = () => {
     setCurrentSection(newSection);
   };
 
-  // Добавить блок в текущую секцию
-  const addBlock = (blockType) => {
-    if (!currentSection) return;
-
+  // Добавить блок в выбранную секцию (по индексу)
+  const addBlock = (sectionIndex, blockType) => {
     const newBlock = {
       blockType,
       title: '',
@@ -65,17 +63,13 @@ const TestCreator = () => {
       speaking: {}
     };
 
-    const updatedSections = testData.sections.map(section => 
-      section === currentSection 
+    const updatedSections = testData.sections.map((section, sIndex) =>
+      sIndex === sectionIndex
         ? { ...section, blocks: [...section.blocks, newBlock] }
         : section
     );
 
-    setTestData(prev => ({
-      ...prev,
-      sections: updatedSections
-    }));
-
+    setTestData(prev => ({ ...prev, sections: updatedSections }));
     setCurrentBlock(newBlock);
   };
 
@@ -112,6 +106,22 @@ const TestCreator = () => {
               pIndex === partIndex ? { ...part, [field]: value } : part
             )
           }
+        : section
+    );
+    setTestData(prev => ({ ...prev, sections: updatedSections }));
+  };
+
+  // Удалить секцию
+  const deleteSection = (sectionIndex) => {
+    const updated = testData.sections.filter((_, idx) => idx !== sectionIndex);
+    setTestData(prev => ({ ...prev, sections: updated }));
+  };
+
+  // Удалить блок
+  const deleteBlock = (sectionIndex, blockIndex) => {
+    const updatedSections = testData.sections.map((section, sIndex) =>
+      sIndex === sectionIndex
+        ? { ...section, blocks: section.blocks.filter((_, bIndex) => bIndex !== blockIndex) }
         : section
     );
     setTestData(prev => ({ ...prev, sections: updatedSections }));
@@ -214,6 +224,23 @@ const TestCreator = () => {
     setTestData(prev => ({ ...prev, sections: updatedSections }));
   };
 
+  // Удалить вопрос из audioPart
+  const deleteQuestionFromAudioPart = (sectionIndex, partIndex, questionIndex) => {
+    const updatedSections = testData.sections.map((section, sIndex) =>
+      sIndex === sectionIndex
+        ? {
+            ...section,
+            audioParts: section.audioParts.map((part, pIndex) =>
+              pIndex === partIndex
+                ? { ...part, questions: part.questions.filter((_, qIndex) => qIndex !== questionIndex) }
+                : part
+            )
+          }
+        : section
+    );
+    setTestData(prev => ({ ...prev, sections: updatedSections }));
+  };
+
   // Добавить вопрос в блок
   const addQuestion = (sectionIndex, blockIndex) => {
     const newQuestion = {
@@ -259,9 +286,75 @@ const TestCreator = () => {
     setTestData(prev => ({ ...prev, sections: updatedSections }));
   };
 
-  // Сохранить тест
+  // Удалить вопрос из блока
+  const deleteQuestion = (sectionIndex, blockIndex, questionIndex) => {
+    const updatedSections = testData.sections.map((section, sIndex) =>
+      sIndex === sectionIndex
+        ? {
+            ...section,
+            blocks: section.blocks.map((block, bIndex) =>
+              bIndex === blockIndex
+                ? { ...block, questions: block.questions.filter((_, qIndex) => qIndex !== questionIndex) }
+                : block
+            )
+          }
+        : section
+    );
+    setTestData(prev => ({ ...prev, sections: updatedSections }));
+  };
+
+  // Подсчет вопросов в audioPart с учетом специфики типов
+  const countQuestionsInPart = (part) => {
+    return part.questions.reduce((sum, q) => {
+      if (q.type === 'table') {
+        const cols = Array.isArray(q.columns) ? q.columns.length : 0;
+        return sum + (cols || 0);
+      }
+      if (q.type === 'gap') {
+        const text = q.text || '';
+        const gaps = (text.match(/\{\{\s*gap\s*\}\}/g) || []).length;
+        return sum + (gaps || 0);
+      }
+      return sum + 1;
+    }, 0);
+  };
+
+  // Сохранить тест с валидацией
   const handleSaveTest = async () => {
     try {
+      // Валидация: Writing должен содержать Part 1 и Part 2 хотя бы по одному
+      const writingSections = testData.sections.filter(s => s.type === 'writing');
+      for (const s of writingSections) {
+        const types = (s.blocks || []).map(b => b.blockType);
+        if (!types.includes('writing_part1') || !types.includes('writing_part2')) {
+          alert('В секции Writing должны быть добавлены оба задания: Part 1 и Part 2.');
+          return;
+        }
+      }
+      // Валидация: Speaking должен содержать минимум 2 вопроса суммарно
+      const speakingSections = testData.sections.filter(s => s.type === 'speaking');
+      for (const s of speakingSections) {
+        const totalSpeakingQs = (s.blocks || []).reduce((acc, b) => acc + ((b.speaking?.questions || []).length), 0);
+        if (totalSpeakingQs < 2) {
+          alert('В секции Speaking должно быть минимум 2 вопроса.');
+          return;
+        }
+      }
+      // Валидация: Listening лимиты с учетом типов
+      const listeningSections = testData.sections.filter(s => s.type === 'listening');
+      for (const s of listeningSections) {
+        const perPartCounts = s.audioParts.map(p => countQuestionsInPart(p));
+        if (perPartCounts.some(c => c > 10)) {
+          alert('В каждой части Listening не должно быть больше 10 вопросов.');
+          return;
+        }
+        const total = perPartCounts.reduce((a, b) => a + b, 0);
+        if (total > 40) {
+          alert('В Listening суммарно не больше 40 вопросов.');
+          return;
+        }
+      }
+
       await createTest(testData);
       alert('Тест успешно создан!');
       setTestData({ name: '', description: '', sections: [] });
@@ -510,6 +603,9 @@ const TestCreator = () => {
                     value={question.correctAnswer}
                     onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'correctAnswer', e.target.value)}
                   />
+                  <div>
+                    <button className="btn-danger" onClick={() => deleteQuestion(sectionIndex, blockIndex, qIndex)}>Удалить вопрос</button>
+                  </div>
                 </div>
               ))}
               <button onClick={() => addQuestion(sectionIndex, blockIndex)}>Добавить вопрос</button>
@@ -949,6 +1045,9 @@ const TestCreator = () => {
         {testData.sections.map((section, sectionIndex) => (
           <div key={sectionIndex} className="section-editor">
             <h3>Секция: {section.type}</h3>
+            <div className="section-actions">
+              <button className="btn-danger" onClick={() => deleteSection(sectionIndex)}>Удалить секцию</button>
+            </div>
             <input
               placeholder="Название секции"
               value={section.title}
@@ -992,12 +1091,28 @@ const TestCreator = () => {
                       />
                     </div>
                     
-                    <div className="questions-summary">
-                      <span>Вопросов: {part.questions.length}/10</span>
-                      {part.questions.length > 10 && (
-                        <span className="warning">⚠️ Превышен лимит вопросов!</span>
-                      )}
-                    </div>
+                    {(() => {
+                      const countQuestionsInPartLocal = (p) => p.questions.reduce((sum, q) => {
+                        if (q.type === 'table') {
+                          const cols = Array.isArray(q.columns) ? q.columns.length : 0;
+                          return sum + (cols || 0);
+                        }
+                        if (q.type === 'gap') {
+                          const gaps = ((q.text || '').match(/\{\{\s*gap\s*\}\}/g) || []).length;
+                          return sum + (gaps || 0);
+                        }
+                        return sum + 1;
+                      }, 0);
+                      const partCount = countQuestionsInPartLocal(part);
+                      return (
+                        <div className="questions-summary">
+                          <span>Вопросов: {partCount}/10</span>
+                          {partCount > 10 && (
+                            <span className="warning">⚠️ Превышен лимит вопросов!</span>
+                          )}
+                        </div>
+                      );
+                    })()}
 
                     <div className="question-types">
                       <button onClick={() => addQuestionToAudioPart(sectionIndex, partIndex, 'mcq')}>Multiple Choice</button>
@@ -1014,6 +1129,7 @@ const TestCreator = () => {
                           <div className="question-header">
                             <span className="question-type">{question.type.toUpperCase()}</span>
                             <span className="question-number">Вопрос {questionIndex + 1}</span>
+                            <button className="btn-danger" onClick={() => deleteQuestionFromAudioPart(sectionIndex, partIndex, questionIndex)}>Удалить</button>
                           </div>
                           {renderQuestionEditor(sectionIndex, partIndex, questionIndex, question)}
                         </div>
@@ -1028,31 +1144,34 @@ const TestCreator = () => {
                 
                 {section.type === 'reading' && (
                   <div className="block-types">
-                    <button onClick={() => addBlock('mcq_group')}>Multiple Choice Group</button>
-                    <button onClick={() => addBlock('tfng_group')}>True/False/Not Given Group</button>
-                    <button onClick={() => addBlock('matching_headings_group')}>Matching Headings Group</button>
-                    <button onClick={() => addBlock('matching_statements')}>Matching Statements</button>
-                    <button onClick={() => addBlock('table_block')}>Table Block</button>
-                    <button onClick={() => addBlock('gap_text_block')}>Gap Fill Text</button>
-                    <button onClick={() => addBlock('gap_table_block')}>Gap Fill Table</button>
+                    <button onClick={() => addBlock(sectionIndex, 'mcq_group')}>Multiple Choice Group</button>
+                    <button onClick={() => addBlock(sectionIndex, 'tfng_group')}>True/False/Not Given Group</button>
+                    <button onClick={() => addBlock(sectionIndex, 'matching_headings_group')}>Matching Headings Group</button>
+                    <button onClick={() => addBlock(sectionIndex, 'matching_statements')}>Matching Statements</button>
+                    <button onClick={() => addBlock(sectionIndex, 'table_block')}>Table Block</button>
+                    <button onClick={() => addBlock(sectionIndex, 'gap_text_block')}>Gap Fill Text</button>
+                    <button onClick={() => addBlock(sectionIndex, 'gap_table_block')}>Gap Fill Table</button>
                   </div>
                 )}
 
                 {section.type === 'writing' && (
                   <div className="block-types">
-                    <button onClick={() => addBlock('writing_part1')}>Writing Part 1</button>
-                    <button onClick={() => addBlock('writing_part2')}>Writing Part 2</button>
+                    <button onClick={() => addBlock(sectionIndex, 'writing_part1')}>Writing Part 1</button>
+                    <button onClick={() => addBlock(sectionIndex, 'writing_part2')}>Writing Part 2</button>
                   </div>
                 )}
 
                 {section.type === 'speaking' && (
                   <div className="block-types">
-                    <button onClick={() => addBlock('speaking_questions')}>Speaking Questions</button>
+                    <button onClick={() => addBlock(sectionIndex, 'speaking_questions')}>Speaking Questions</button>
                   </div>
                 )}
 
                 {section.blocks.map((block, blockIndex) => (
                   <div key={blockIndex} className="block-container">
+                    <div className="block-actions">
+                      <button className="btn-danger" onClick={() => deleteBlock(sectionIndex, blockIndex)}>Удалить блок</button>
+                    </div>
                     {renderBlockEditor(sectionIndex, blockIndex, block)}
                   </div>
                 ))}

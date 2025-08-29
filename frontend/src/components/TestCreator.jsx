@@ -14,13 +14,31 @@ const TestCreator = () => {
 
   // Добавить новую секцию
   const addSection = (sectionType) => {
-    const newSection = {
-      type: sectionType,
-      title: '',
-      durationSec: 0,
-      audioParts: [],
-      blocks: []
-    };
+    let newSection;
+    
+    if (sectionType === 'listening') {
+      // Для Listening создаем 3 части по умолчанию
+      newSection = {
+        type: sectionType,
+        title: '',
+        durationSec: 0,
+        audioParts: [
+          { index: 1, audioUrl: '', duration: 0, questions: [] },
+          { index: 2, audioUrl: '', duration: 0, questions: [] },
+          { index: 3, audioUrl: '', duration: 0, questions: [] }
+        ],
+        blocks: []
+      };
+    } else {
+      newSection = {
+        type: sectionType,
+        title: '',
+        durationSec: 0,
+        audioParts: [],
+        blocks: []
+      };
+    }
+    
     setTestData(prev => ({
       ...prev,
       sections: [...prev.sections, newSection]
@@ -83,6 +101,118 @@ const TestCreator = () => {
     setTestData(prev => ({ ...prev, sections: updatedSections }));
   };
 
+  // Обновить данные audioPart
+  const updateAudioPart = (sectionIndex, partIndex, field, value) => {
+    const updatedSections = testData.sections.map((section, sIndex) =>
+      sIndex === sectionIndex
+        ? {
+            ...section,
+            audioParts: section.audioParts.map((part, pIndex) =>
+              pIndex === partIndex ? { ...part, [field]: value } : part
+            )
+          }
+        : section
+    );
+    setTestData(prev => ({ ...prev, sections: updatedSections }));
+  };
+
+  // Добавить вопрос в audioPart
+  const addQuestionToAudioPart = (sectionIndex, partIndex, questionType) => {
+    let newQuestion;
+    
+    switch (questionType) {
+      case 'mcq':
+        newQuestion = {
+          id: `q_${Date.now()}`,
+          type: 'mcq',
+          prompt: '',
+          options: ['', '', '', ''],
+          correctAnswer: ''
+        };
+        break;
+      case 'tfng':
+        newQuestion = {
+          id: `q_${Date.now()}`,
+          type: 'tfng',
+          prompt: '',
+          correctAnswer: ''
+        };
+        break;
+      case 'matching':
+        newQuestion = {
+          id: `q_${Date.now()}`,
+          type: 'matching',
+          prompt: '',
+          leftItems: [''],
+          rightItems: [''],
+          correctAnswers: []
+        };
+        break;
+      case 'table':
+        newQuestion = {
+          id: `q_${Date.now()}`,
+          type: 'table',
+          prompt: '',
+          columns: [''],
+          rows: [''],
+          correctAnswers: []
+        };
+        break;
+      case 'gap':
+        newQuestion = {
+          id: `q_${Date.now()}`,
+          type: 'gap',
+          prompt: '',
+          text: '',
+          gaps: []
+        };
+        break;
+      default:
+        newQuestion = {
+          id: `q_${Date.now()}`,
+          type: 'short',
+          prompt: '',
+          correctAnswer: ''
+        };
+    }
+
+    const updatedSections = testData.sections.map((section, sIndex) =>
+      sIndex === sectionIndex
+        ? {
+            ...section,
+            audioParts: section.audioParts.map((part, pIndex) =>
+              pIndex === partIndex 
+                ? { ...part, questions: [...part.questions, newQuestion] }
+                : part
+            )
+          }
+        : section
+    );
+    setTestData(prev => ({ ...prev, sections: updatedSections }));
+  };
+
+  // Обновить вопрос в audioPart
+  const updateQuestionInAudioPart = (sectionIndex, partIndex, questionIndex, field, value) => {
+    const updatedSections = testData.sections.map((section, sIndex) =>
+      sIndex === sectionIndex
+        ? {
+            ...section,
+            audioParts: section.audioParts.map((part, pIndex) =>
+              pIndex === partIndex
+                ? {
+                    ...part,
+                    questions: part.questions.map((question, qIndex) =>
+                      qIndex === questionIndex ? { ...question, [field]: value } : question
+                    )
+                  }
+                : part
+            )
+          }
+        : section
+    );
+    setTestData(prev => ({ ...prev, sections: updatedSections }));
+  };
+
   // Добавить вопрос в блок
   const addQuestion = (sectionIndex, blockIndex) => {
     const newQuestion = {
@@ -138,6 +268,201 @@ const TestCreator = () => {
       setCurrentBlock(null);
     } catch (error) {
       alert('Ошибка при создании теста: ' + error.message);
+    }
+  };
+
+  const renderQuestionEditor = (sectionIndex, partIndex, questionIndex, question) => {
+    const updateQuestionField = (field, value) => updateQuestionInAudioPart(sectionIndex, partIndex, questionIndex, field, value);
+
+    switch (question.type) {
+      case 'mcq':
+        return (
+          <div className="question-editor">
+            <h5>Multiple Choice Question</h5>
+            <input
+              placeholder="Вопрос"
+              value={question.prompt}
+              onChange={(e) => updateQuestionField('prompt', e.target.value)}
+            />
+            {question.options.map((option, oIndex) => (
+              <input
+                key={oIndex}
+                placeholder={`Вариант ${oIndex + 1}`}
+                value={option}
+                onChange={(e) => {
+                  const newOptions = [...question.options];
+                  newOptions[oIndex] = e.target.value;
+                  updateQuestionField('options', newOptions);
+                }}
+              />
+            ))}
+            <input
+              placeholder="Правильный ответ"
+              value={question.correctAnswer}
+              onChange={(e) => updateQuestionField('correctAnswer', e.target.value)}
+            />
+          </div>
+        );
+
+      case 'tfng':
+        return (
+          <div className="question-editor">
+            <h5>True/False/Not Given Question</h5>
+            <input
+              placeholder="Утверждение"
+              value={question.prompt}
+              onChange={(e) => updateQuestionField('prompt', e.target.value)}
+            />
+            <select
+              value={question.correctAnswer}
+              onChange={(e) => updateQuestionField('correctAnswer', e.target.value)}
+            >
+              <option value="">Выберите ответ</option>
+              <option value="true">True</option>
+              <option value="false">False</option>
+              <option value="not_given">Not Given</option>
+            </select>
+          </div>
+        );
+
+      case 'matching':
+        return (
+          <div className="question-editor">
+            <h5>Matching Question</h5>
+            <input
+              placeholder="Инструкции"
+              value={question.prompt}
+              onChange={(e) => updateQuestionField('prompt', e.target.value)}
+            />
+            <div className="matching-items">
+              <div className="left-items">
+                <h6>Левые элементы:</h6>
+                {question.leftItems.map((item, index) => (
+                  <input
+                    key={index}
+                    placeholder={`Элемент ${index + 1}`}
+                    value={item}
+                    onChange={(e) => {
+                      const newItems = [...question.leftItems];
+                      newItems[index] = e.target.value;
+                      updateQuestionField('leftItems', newItems);
+                    }}
+                  />
+                ))}
+                <button onClick={() => {
+                  const newItems = [...question.leftItems, ''];
+                  updateQuestionField('leftItems', newItems);
+                }}>Добавить элемент</button>
+              </div>
+              <div className="right-items">
+                <h6>Правые элементы:</h6>
+                {question.rightItems.map((item, index) => (
+                  <input
+                    key={index}
+                    placeholder={`Элемент ${index + 1}`}
+                    value={item}
+                    onChange={(e) => {
+                      const newItems = [...question.rightItems];
+                      newItems[index] = e.target.value;
+                      updateQuestionField('rightItems', newItems);
+                    }}
+                  />
+                ))}
+                <button onClick={() => {
+                  const newItems = [...question.rightItems, ''];
+                  updateQuestionField('rightItems', newItems);
+                }}>Добавить элемент</button>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'table':
+        return (
+          <div className="question-editor">
+            <h5>Table Question</h5>
+            <input
+              placeholder="Инструкции"
+              value={question.prompt}
+              onChange={(e) => updateQuestionField('prompt', e.target.value)}
+            />
+            <div className="table-items">
+              <div className="columns">
+                <h6>Колонки:</h6>
+                {question.columns.map((col, index) => (
+                  <input
+                    key={index}
+                    placeholder={`Колонка ${index + 1}`}
+                    value={col}
+                    onChange={(e) => {
+                      const newCols = [...question.columns];
+                      newCols[index] = e.target.value;
+                      updateQuestionField('columns', newCols);
+                    }}
+                  />
+                ))}
+                <button onClick={() => {
+                  const newCols = [...question.columns, ''];
+                  updateQuestionField('columns', newCols);
+                }}>Добавить колонку</button>
+              </div>
+              <div className="rows">
+                <h6>Строки:</h6>
+                {question.rows.map((row, index) => (
+                  <input
+                    key={index}
+                    placeholder={`Строка ${index + 1}`}
+                    value={row}
+                    onChange={(e) => {
+                      const newRows = [...question.rows];
+                      newRows[index] = e.target.value;
+                      updateQuestionField('rows', newRows);
+                    }}
+                  />
+                ))}
+                <button onClick={() => {
+                  const newRows = [...question.rows, ''];
+                  updateQuestionField('rows', newRows);
+                }}>Добавить строку</button>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'gap':
+        return (
+          <div className="question-editor">
+            <h5>Gap Fill Question</h5>
+            <input
+              placeholder="Инструкции"
+              value={question.prompt}
+              onChange={(e) => updateQuestionField('prompt', e.target.value)}
+            />
+            <textarea
+              placeholder="Текст с пропусками (используйте {{gap}} для обозначения пропуска)"
+              value={question.text}
+              onChange={(e) => updateQuestionField('text', e.target.value)}
+              rows={4}
+            />
+          </div>
+        );
+
+      default:
+        return (
+          <div className="question-editor">
+            <h5>Short Answer Question</h5>
+            <input
+              placeholder="Вопрос"
+              value={question.prompt}
+              onChange={(e) => updateQuestionField('prompt', e.target.value)}
+            />
+            <input
+              placeholder="Правильный ответ"
+              value={question.correctAnswer}
+              onChange={(e) => updateQuestionField('correctAnswer', e.target.value)}
+            />
+          </div>
+        );
     }
   };
 
@@ -635,51 +960,92 @@ const TestCreator = () => {
               onChange={(e) => updateSection(sectionIndex, 'durationSec', parseInt(e.target.value) || 0)}
             />
 
-            <div className="blocks-creator">
-              <h4>Блоки секции</h4>
-              
-              {section.type === 'listening' && (
-                <div className="block-types">
-                  <button onClick={() => addBlock('mcq_group')}>Multiple Choice Group</button>
-                  <button onClick={() => addBlock('tfng_group')}>True/False/Not Given Group</button>
-                  <button onClick={() => addBlock('matching_statements')}>Matching Statements</button>
-                  <button onClick={() => addBlock('table_block')}>Table Block</button>
-                  <button onClick={() => addBlock('gap_text_block')}>Gap Fill Text</button>
-                  <button onClick={() => addBlock('gap_table_block')}>Gap Fill Table</button>
-                </div>
-              )}
+            {section.type === 'listening' ? (
+              <div className="audio-parts-creator">
+                <h4>Аудио части (3 части по 15 вопросов каждая)</h4>
+                {section.audioParts.map((part, partIndex) => (
+                  <div key={partIndex} className="audio-part-container">
+                    <h5>Часть {part.index}</h5>
+                    <div className="audio-part-info">
+                      <input
+                        placeholder="URL аудиофайла"
+                        value={part.audioUrl}
+                        onChange={(e) => updateAudioPart(sectionIndex, partIndex, 'audioUrl', e.target.value)}
+                      />
+                      <input
+                        type="number"
+                        placeholder="Длительность (секунды)"
+                        value={part.duration}
+                        onChange={(e) => updateAudioPart(sectionIndex, partIndex, 'duration', parseInt(e.target.value) || 0)}
+                      />
+                    </div>
+                    
+                    <div className="questions-summary">
+                      <span>Вопросов: {part.questions.length}/15</span>
+                      {part.questions.length > 15 && (
+                        <span className="warning">⚠️ Превышен лимит вопросов!</span>
+                      )}
+                    </div>
 
-              {section.type === 'reading' && (
-                <div className="block-types">
-                  <button onClick={() => addBlock('mcq_group')}>Multiple Choice Group</button>
-                  <button onClick={() => addBlock('tfng_group')}>True/False/Not Given Group</button>
-                  <button onClick={() => addBlock('matching_headings_group')}>Matching Headings Group</button>
-                  <button onClick={() => addBlock('matching_statements')}>Matching Statements</button>
-                  <button onClick={() => addBlock('table_block')}>Table Block</button>
-                  <button onClick={() => addBlock('gap_text_block')}>Gap Fill Text</button>
-                  <button onClick={() => addBlock('gap_table_block')}>Gap Fill Table</button>
-                </div>
-              )}
+                    <div className="question-types">
+                      <button onClick={() => addQuestionToAudioPart(sectionIndex, partIndex, 'mcq')}>Multiple Choice</button>
+                      <button onClick={() => addQuestionToAudioPart(sectionIndex, partIndex, 'tfng')}>True/False/Not Given</button>
+                      <button onClick={() => addQuestionToAudioPart(sectionIndex, partIndex, 'matching')}>Matching</button>
+                      <button onClick={() => addQuestionToAudioPart(sectionIndex, partIndex, 'table')}>Table</button>
+                      <button onClick={() => addQuestionToAudioPart(sectionIndex, partIndex, 'gap')}>Gap Fill</button>
+                      <button onClick={() => addQuestionToAudioPart(sectionIndex, partIndex, 'short')}>Short Answer</button>
+                    </div>
 
-              {section.type === 'writing' && (
-                <div className="block-types">
-                  <button onClick={() => addBlock('writing_part1')}>Writing Part 1</button>
-                  <button onClick={() => addBlock('writing_part2')}>Writing Part 2</button>
-                </div>
-              )}
+                    <div className="questions-list">
+                      {part.questions.map((question, questionIndex) => (
+                        <div key={questionIndex} className="question-container">
+                          <div className="question-header">
+                            <span className="question-type">{question.type.toUpperCase()}</span>
+                            <span className="question-number">Вопрос {questionIndex + 1}</span>
+                          </div>
+                          {renderQuestionEditor(sectionIndex, partIndex, questionIndex, question)}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="blocks-creator">
+                <h4>Блоки секции</h4>
+                
+                {section.type === 'reading' && (
+                  <div className="block-types">
+                    <button onClick={() => addBlock('mcq_group')}>Multiple Choice Group</button>
+                    <button onClick={() => addBlock('tfng_group')}>True/False/Not Given Group</button>
+                    <button onClick={() => addBlock('matching_headings_group')}>Matching Headings Group</button>
+                    <button onClick={() => addBlock('matching_statements')}>Matching Statements</button>
+                    <button onClick={() => addBlock('table_block')}>Table Block</button>
+                    <button onClick={() => addBlock('gap_text_block')}>Gap Fill Text</button>
+                    <button onClick={() => addBlock('gap_table_block')}>Gap Fill Table</button>
+                  </div>
+                )}
 
-              {section.type === 'speaking' && (
-                <div className="block-types">
-                  <button onClick={() => addBlock('speaking_questions')}>Speaking Questions</button>
-                </div>
-              )}
+                {section.type === 'writing' && (
+                  <div className="block-types">
+                    <button onClick={() => addBlock('writing_part1')}>Writing Part 1</button>
+                    <button onClick={() => addBlock('writing_part2')}>Writing Part 2</button>
+                  </div>
+                )}
 
-              {section.blocks.map((block, blockIndex) => (
-                <div key={blockIndex} className="block-container">
-                  {renderBlockEditor(sectionIndex, blockIndex, block)}
-                </div>
-              ))}
-            </div>
+                {section.type === 'speaking' && (
+                  <div className="block-types">
+                    <button onClick={() => addBlock('speaking_questions')}>Speaking Questions</button>
+                  </div>
+                )}
+
+                {section.blocks.map((block, blockIndex) => (
+                  <div key={blockIndex} className="block-container">
+                    {renderBlockEditor(sectionIndex, blockIndex, block)}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>

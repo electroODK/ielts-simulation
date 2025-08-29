@@ -4,12 +4,15 @@ import { getTests, createTest, assignTestToUser } from "../api/api";
 import { createAssignment, listAssignments } from "../api/api";
 import api from "../api/api";
 import { getAllResults, updateResult, finalizeResult, publishResult } from "../api/api";
+import TestCreator from "./TestCreator";
+import TestDemo from "./TestDemo";
 
 const AdminPanel = () => {
   const [users, setUsers] = useState([]);
   const [tests, setTests] = useState([]);
   const [results, setResults] = useState([]);
   const [assignments, setAssignments] = useState([]);
+  const [activeTab, setActiveTab] = useState('main');
 
   const [newUser, setNewUser] = useState({ username: "", password: "", role: "user" });
   const [newTest, setNewTest] = useState({ name: "", description: "" });
@@ -64,6 +67,55 @@ const AdminPanel = () => {
   return (
     <div style={{ padding: 24 }}>
       <h1>Admin Panel</h1>
+      
+      <div style={{ marginBottom: 20 }}>
+        <button 
+          onClick={() => setActiveTab('main')} 
+          style={{ 
+            marginRight: 10, 
+            padding: '10px 20px',
+            backgroundColor: activeTab === 'main' ? '#3498db' : '#ecf0f1',
+            color: activeTab === 'main' ? 'white' : '#2c3e50',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer'
+          }}
+        >
+          Основная панель
+        </button>
+        <button 
+          onClick={() => setActiveTab('testCreator')} 
+          style={{ 
+            padding: '10px 20px',
+            backgroundColor: activeTab === 'testCreator' ? '#3498db' : '#ecf0f1',
+            color: activeTab === 'testCreator' ? 'white' : '#2c3e50',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer'
+          }}
+        >
+          Создание тестов
+        </button>
+        <button 
+          onClick={() => setActiveTab('testDemo')} 
+          style={{ 
+            padding: '10px 20px',
+            backgroundColor: activeTab === 'testDemo' ? '#3498db' : '#ecf0f1',
+            color: activeTab === 'testDemo' ? 'white' : '#2c3e50',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer'
+          }}
+        >
+          Демо тестов
+        </button>
+      </div>
+
+      {activeTab === 'testCreator' ? (
+        <TestCreator />
+      ) : activeTab === 'testDemo' ? (
+        <TestDemo />
+      ) : (
 
       <section>
         <h2>Create user</h2>
@@ -178,6 +230,7 @@ const AdminPanel = () => {
           </tbody>
         </table>
       </section>
+      )}
     </div>
   );
 };

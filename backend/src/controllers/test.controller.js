@@ -33,39 +33,130 @@ export const getTestPublic = async (req, res) => {
   const test = await Test.findById(testId);
   if (!test) return res.status(404).json({ message: "Test not found" });
 
-  const sanitizeSimpleQuestions = (questions) =>
-    questions.map((q) => ({ id: q._id, prompt: q.prompt, options: q.options || [] }));
+  // Поддержка как старой, так и новой структуры
+  if (test.sections && test.sections.length > 0) {
+    // Новая структура с секциями и блоками
+    const sanitizeBlock = (block) => {
+      const sanitizedBlock = {
+        blockType: block.blockType,
+        title: block.title,
+        instructions: block.instructions
+      };
 
-  const sanitizeTypedQuestions = (questions) =>
-    (questions || []).map((q) => ({
-      id: q.id || q._id,
-      type: q.type,
-      prompt: q.prompt,
-      options: q.options || [],
-      content: q.content || [],
-    }));
+      switch (block.blockType) {
+        case 'mcq_group':
+        case 'tfng_group':
+          sanitizedBlock.questions = (block.questions || []).map(q => ({
+            prompt: q.prompt,
+            options: q.options || []
+          }));
+          break;
+        
+        case 'matching_statements':
+          sanitizedBlock.matching = {
+            left: block.matching?.left || [],
+            right: block.matching?.right || []
+          };
+          break;
+        
+        case 'matching_headings_group':
+          sanitizedBlock.headings = {
+            headings: block.headings?.headings || [],
+            items: (block.headings?.items || []).map(item => ({
+              prompt: item.prompt
+            }))
+          };
+          break;
+        
+        case 'table_block':
+          sanitizedBlock.table = {
+            columns: block.table?.columns || [],
+            rows: block.table?.rows || []
+          };
+          break;
+        
+        case 'gap_text_block':
+          sanitizedBlock.gapText = {
+            template: block.gapText?.template || ''
+          };
+          break;
+        
+        case 'gap_table_block':
+          sanitizedBlock.gapTable = {
+            columns: block.gapTable?.columns || [],
+            rows: block.gapTable?.rows || []
+          };
+          break;
+        
+        case 'writing_part1':
+        case 'writing_part2':
+          sanitizedBlock.writing = {
+            imageUrl: block.writing?.imageUrl,
+            prompt: block.writing?.prompt || ''
+          };
+          break;
+        
+        case 'speaking_questions':
+          sanitizedBlock.speaking = {
+            questions: block.speaking?.questions || []
+          };
+          break;
+      }
 
-  const payload = {
-    id: test._id,
-    name: test.name,
-    description: test.description,
-    listeningAudioUrl: test.listeningAudioUrl || "",
-    listening: sanitizeSimpleQuestions(test.listening || []),
-    listeningParts: (test.listeningParts || []).map((p) => ({
-      index: p.index,
-      audioUrl: p.audioUrl,
-      duration: p.duration,
-      questions: sanitizeTypedQuestions(p.questions),
-    })),
-    readingPassages: (test.readingPassages || []).map((rp) => ({
-      index: rp.index,
-      title: rp.title,
-      // content nodes without answers
-      content: (rp.content || []).map((n) => n.type === 'gap' ? { type: 'gap', id: n.id } : n),
-      questions: sanitizeTypedQuestions(rp.questions),
-    })),
-  };
-  return res.json(payload);
+      return sanitizedBlock;
+    };
+
+    const sanitizeSection = (section) => ({
+      type: section.type,
+      title: section.title,
+      durationSec: section.durationSec,
+      blocks: (section.blocks || []).map(sanitizeBlock)
+    });
+
+    const payload = {
+      id: test._id,
+      name: test.name,
+      description: test.description,
+      sections: (test.sections || []).map(sanitizeSection)
+    };
+
+    return res.json(payload);
+  } else {
+    // Старая структура (для обратной совместимости)
+    const sanitizeSimpleQuestions = (questions) =>
+      questions.map((q) => ({ id: q._id, prompt: q.prompt, options: q.options || [] }));
+
+    const sanitizeTypedQuestions = (questions) =>
+      (questions || []).map((q) => ({
+        id: q.id || q._id,
+        type: q.type,
+        prompt: q.prompt,
+        options: q.options || [],
+        content: q.content || [],
+      }));
+
+    const payload = {
+      id: test._id,
+      name: test.name,
+      description: test.description,
+      listeningAudioUrl: test.listeningAudioUrl || "",
+      listening: sanitizeSimpleQuestions(test.listening || []),
+      listeningParts: (test.listeningParts || []).map((p) => ({
+        index: p.index,
+        audioUrl: p.audioUrl,
+        duration: p.duration,
+        questions: sanitizeTypedQuestions(p.questions),
+      })),
+      readingPassages: (test.readingPassages || []).map((rp) => ({
+        index: rp.index,
+        title: rp.title,
+        // content nodes without answers
+        content: (rp.content || []).map((n) => n.type === 'gap' ? { type: 'gap', id: n.id } : n),
+        questions: sanitizeTypedQuestions(rp.questions),
+      })),
+    };
+    return res.json(payload);
+  }
 };
 
 export const assignTest = async (req, res) => {

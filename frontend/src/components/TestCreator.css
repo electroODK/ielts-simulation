@@ -1,0 +1,409 @@
+.test-creator {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.test-creator h1 {
+  color: #2c3e50;
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 2.5rem;
+}
+
+.test-creator h2 {
+  color: #34495e;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.test-creator h3 {
+  color: #2c3e50;
+  background: #ecf0f1;
+  padding: 10px;
+  border-radius: 5px;
+  margin: 15px 0;
+}
+
+.test-creator h4 {
+  color: #34495e;
+  margin: 15px 0 10px 0;
+}
+
+.test-creator h5 {
+  color: #7f8c8d;
+  margin: 10px 0 5px 0;
+  font-size: 0.9rem;
+}
+
+/* Основная информация о тесте */
+.test-basic-info {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  border: 1px solid #e9ecef;
+}
+
+.test-basic-info input,
+.test-basic-info textarea {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.test-basic-info textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+/* Секции */
+.sections-creator {
+  margin-bottom: 30px;
+}
+
+.section-types {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.section-types button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  background: #3498db;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.section-types button:hover {
+  background: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.section-editor {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.section-editor input {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* Блоки */
+.blocks-creator {
+  margin-top: 20px;
+}
+
+.block-types {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.block-types button {
+  padding: 8px 16px;
+  border: 1px solid #3498db;
+  border-radius: 4px;
+  background: white;
+  color: #3498db;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.3s ease;
+}
+
+.block-types button:hover {
+  background: #3498db;
+  color: white;
+}
+
+.block-container {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 15px;
+  margin: 10px 0;
+}
+
+.block-editor {
+  background: white;
+  padding: 15px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.block-editor input,
+.block-editor textarea,
+.block-editor select {
+  width: 100%;
+  padding: 8px;
+  margin: 5px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.block-editor textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+
+/* Списки вопросов */
+.questions-list {
+  margin-top: 15px;
+}
+
+.question-item {
+  background: #f8f9fa;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+}
+
+.question-item input {
+  margin: 5px 0;
+}
+
+/* Matching редактор */
+.matching-editor {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 15px;
+}
+
+.left-items,
+.right-items {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 4px;
+}
+
+.left-items input,
+.right-items input {
+  margin: 5px 0;
+}
+
+/* Headings редактор */
+.headings-editor {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 15px;
+}
+
+.headings-list,
+.items-list {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 4px;
+}
+
+.item-editor {
+  background: white;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.item-editor textarea {
+  margin-bottom: 10px;
+}
+
+/* Table редактор */
+.table-editor {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 15px;
+}
+
+.columns-editor,
+.rows-editor {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 4px;
+}
+
+/* Gap редакторы */
+.gap-text-editor,
+.gap-table-editor {
+  margin-top: 15px;
+}
+
+.gap-text-editor textarea {
+  min-height: 120px;
+}
+
+/* Writing редактор */
+.writing-editor {
+  margin-top: 15px;
+}
+
+.writing-editor input,
+.writing-editor textarea {
+  margin: 5px 0;
+}
+
+/* Speaking редактор */
+.speaking-editor {
+  margin-top: 15px;
+}
+
+.speaking-editor textarea {
+  margin: 5px 0;
+}
+
+/* Кнопки */
+button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background: #27ae60;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  margin: 5px 5px 5px 0;
+}
+
+button:hover {
+  background: #229954;
+  transform: translateY(-1px);
+}
+
+.save-section {
+  text-align: center;
+  margin-top: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.save-button {
+  padding: 15px 30px;
+  font-size: 16px;
+  font-weight: bold;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.save-button:hover {
+  background: #c0392b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .test-creator {
+    padding: 10px;
+  }
+  
+  .section-types {
+    flex-direction: column;
+  }
+  
+  .matching-editor,
+  .headings-editor,
+  .table-editor {
+    grid-template-columns: 1fr;
+  }
+  
+  .block-types {
+    flex-direction: column;
+  }
+}
+
+/* Анимации */
+.block-container {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Стили для фокуса */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+/* Стили для ошибок */
+.error {
+  border-color: #e74c3c !important;
+  background-color: #fdf2f2;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+/* Стили для успеха */
+.success {
+  border-color: #27ae60 !important;
+  background-color: #f2fdf2;
+}
+
+/* Дополнительные стили для улучшения UX */
+.block-editor h4 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.block-editor h4::before {
+  content: "📝";
+  font-size: 1.2em;
+}
+
+.section-editor h3::before {
+  content: "📋";
+  margin-right: 10px;
+}
+
+.question-item::before {
+  content: "❓";
+  margin-right: 10px;
+  font-size: 1.1em;
+}

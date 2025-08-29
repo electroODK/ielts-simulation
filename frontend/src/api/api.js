@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:1488/api"; // адрес бэкенда
+const API_URL = "https://c1b72a908cc2.ngrok-free.app/api"; // адрес бэкенда
 
 // 🔧 экземпляр axios
 const api = axios.create({

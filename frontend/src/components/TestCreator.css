@@ -67,6 +67,30 @@
   margin-bottom: 30px;
 }
 
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tab {
+  padding: 10px 16px;
+  border: 1px solid #3498db;
+  background: white;
+  color: #3498db;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.tab.active {
+  background: #3498db;
+  color: white;
+}
+
+.tab-actions {
+  margin-bottom: 16px;
+}
+
 .section-types {
   display: flex;
   gap: 10px;
@@ -425,6 +449,23 @@ select:focus {
   font-size: 1.2rem;
   border-bottom: 2px solid #3498db;
   padding-bottom: 10px;
+}
+
+/* Reading parts */
+.reading-parts-creator {
+  margin-top: 20px;
+}
+
+.reading-part-container {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.reading-part-info textarea {
+  min-height: 120px;
 }
 
 .audio-part-container {

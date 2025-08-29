@@ -960,10 +960,21 @@ const TestCreator = () => {
               onChange={(e) => updateSection(sectionIndex, 'durationSec', parseInt(e.target.value) || 0)}
             />
 
-            {section.type === 'listening' ? (
-              <div className="audio-parts-creator">
-                <h4>Аудио части (3 части по 15 вопросов каждая)</h4>
-                {section.audioParts.map((part, partIndex) => (
+                          {section.type === 'listening' ? (
+                <div className="audio-parts-creator">
+                  <h4>Аудио части (3 части, максимум 40 вопросов всего)</h4>
+                  {(() => {
+                    const totalQuestions = section.audioParts.reduce((sum, part) => sum + part.questions.length, 0);
+                    return (
+                      <div className="total-questions-summary">
+                        <span>Всего вопросов: {totalQuestions}/40</span>
+                        {totalQuestions > 40 && (
+                          <span className="warning">⚠️ Превышен общий лимит вопросов!</span>
+                        )}
+                      </div>
+                    );
+                  })()}
+                  {section.audioParts.map((part, partIndex) => (
                   <div key={partIndex} className="audio-part-container">
                     <h5>Часть {part.index}</h5>
                     <div className="audio-part-info">

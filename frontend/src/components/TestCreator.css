@@ -385,7 +385,7 @@ select:focus {
   background-color: #f2fdf2;
 }
 
-/* Audio Parts для Listening (3 части, максимум 40 вопросов) */
+/* Audio Parts для Listening (4 части, максимум 40 вопросов) */
 .audio-parts-creator {
   margin-top: 20px;
 }

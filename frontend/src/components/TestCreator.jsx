@@ -17,7 +17,7 @@ const TestCreator = () => {
     let newSection;
     
     if (sectionType === 'listening') {
-      // Для Listening создаем 3 части по умолчанию
+      // Для Listening создаем 4 части по умолчанию
       newSection = {
         type: sectionType,
         title: '',
@@ -25,7 +25,8 @@ const TestCreator = () => {
         audioParts: [
           { index: 1, audioUrl: '', duration: 0, questions: [] },
           { index: 2, audioUrl: '', duration: 0, questions: [] },
-          { index: 3, audioUrl: '', duration: 0, questions: [] }
+          { index: 3, audioUrl: '', duration: 0, questions: [] },
+          { index: 4, audioUrl: '', duration: 0, questions: [] }
         ],
         blocks: []
       };
@@ -962,7 +963,7 @@ const TestCreator = () => {
 
                           {section.type === 'listening' ? (
                 <div className="audio-parts-creator">
-                  <h4>Аудио части (3 части, максимум 40 вопросов всего)</h4>
+                  <h4>Аудио части (4 части, максимум 40 вопросов всего)</h4>
                   {(() => {
                     const totalQuestions = section.audioParts.reduce((sum, part) => sum + part.questions.length, 0);
                     return (
@@ -992,8 +993,8 @@ const TestCreator = () => {
                     </div>
                     
                     <div className="questions-summary">
-                      <span>Вопросов: {part.questions.length}/15</span>
-                      {part.questions.length > 15 && (
+                      <span>Вопросов: {part.questions.length}/10</span>
+                      {part.questions.length > 10 && (
                         <span className="warning">⚠️ Превышен лимит вопросов!</span>
                       )}
                     </div>

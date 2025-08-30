@@ -17,7 +17,7 @@ const createUser = async () => {
     console.log("✅ Connected to MongoDB");
 
     // Проверяем, существует ли уже админ
-    const existingAdmin = await User.findOne({ username: "admin" });
+    const existingAdmin = await User.findOne({ username: "admin2" });
     if (existingAdmin) {
       console.log("ℹ️ Admin already exists:", existingAdmin.username);
     } else {
@@ -25,7 +25,7 @@ const createUser = async () => {
       const hash = await bcrypt.hash("12345", 10);
 
       // Создаём администратора
-      const adminUser = new User({ username: "admin", password: hash, role: "admin", status: "ready" });
+      const adminUser = new User({ username: "admin2", password: hash, role: "admin", status: "ready" });
       await adminUser.save();
       console.log("✅ Admin user created:", adminUser.username);
     }

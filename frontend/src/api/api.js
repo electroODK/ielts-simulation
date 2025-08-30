@@ -1,16 +1,17 @@
-import axios from "axios";
-
-const API_URL = "https://c1b72a908cc2.ngrok-free.app/api"; // адрес бэкенда
+import axios from 'axios';
+import dotenv from "dotenv";
+dotenv.config();
+const API_URL = process.env.BACKEND_URL || "https://c1b72a908cc2.ngrok-free.app/api"; // адрес бэкенда
 
 // 🔧 экземпляр axios
 const api = axios.create({
   baseURL: API_URL,
-  withCredentials: true,  
+  withCredentials: true,
 });
 
 // ⬆️ interceptor для accessToken
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem('access_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -24,24 +25,29 @@ api.interceptors.response.use(
     const originalRequest = error.config;
     const isRefreshCall = originalRequest?.url?.includes('/auth/refresh-token');
     const hasRt = !!localStorage.getItem('refresh_token');
-    if (error.response?.status === 401 && !originalRequest._retry && !isRefreshCall && hasRt) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !isRefreshCall &&
+      hasRt
+    ) {
       originalRequest._retry = true;
 
       try {
-        const { data } = await api.put("/auth/refresh-token", {
-          refreshToken: localStorage.getItem("refresh_token"),
+        const { data } = await api.put('/auth/refresh-token', {
+          refreshToken: localStorage.getItem('refresh_token'),
         });
 
-        localStorage.setItem("access_token", data.accessToken);
-        localStorage.setItem("refresh_token", data.refreshToken);
+        localStorage.setItem('access_token', data.accessToken);
+        localStorage.setItem('refresh_token', data.refreshToken);
 
         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
         return api(originalRequest);
       } catch (err) {
-        console.error("❌ Ошибка обновления токена:", err);
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-        if (!isRefreshCall) window.location.href = "/"; // редирект на логин
+        console.error('❌ Ошибка обновления токена:', err);
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        if (!isRefreshCall) window.location.href = '/'; // редирект на логин
       }
     }
 
@@ -57,32 +63,32 @@ api.interceptors.response.use(
 export const loginUser = async (username, password) => {
   const payload = { username };
   if (password) payload.password = password;
-  const { data } = await api.post("/auth/login", payload);
-  localStorage.setItem("access_token", data.accessToken);
-  localStorage.setItem("refresh_token", data.refreshToken);
+  const { data } = await api.post('/auth/login', payload);
+  localStorage.setItem('access_token', data.accessToken);
+  localStorage.setItem('refresh_token', data.refreshToken);
   return data;
 };
 
 // 👮 Admin login
 export const loginAdmin = async (username, password) => {
-  const { data } = await api.post("/auth/admin/login", { username, password });
-  localStorage.setItem("access_token", data.accessToken);
-  localStorage.setItem("refresh_token", data.refreshToken);
+  const { data } = await api.post('/auth/admin/login', { username, password });
+  localStorage.setItem('access_token', data.accessToken);
+  localStorage.setItem('refresh_token', data.refreshToken);
   return data;
 };
 
 export const logout = async () => {
-  await api.post("/auth/logout");
-  localStorage.removeItem("access_token");
-  localStorage.removeItem("refresh_token");
+  await api.post('/auth/logout');
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
 };
 
 export const refreshToken = async () => {
-  const { data } = await api.put("/auth/refresh-token", {
-    refreshToken: localStorage.getItem("refresh_token"),
+  const { data } = await api.put('/auth/refresh-token', {
+    refreshToken: localStorage.getItem('refresh_token'),
   });
-  localStorage.setItem("access_token", data.accessToken);
-  localStorage.setItem("refresh_token", data.refreshToken);
+  localStorage.setItem('access_token', data.accessToken);
+  localStorage.setItem('refresh_token', data.refreshToken);
   return data;
 };
 
@@ -92,7 +98,7 @@ export const refreshToken = async () => {
 // ======================
 // создать тест (сборка из секций)
 export const createTest = async (testData) => {
-  const { data } = await api.post("/tests", testData);
+  const { data } = await api.post('/tests', testData);
   return data;
 };
 
@@ -138,7 +144,7 @@ export const assignTestToUser = async (userId, testId) => {
 // ======================
 // создать юзера (только админ)
 export const createUser = async (userData) => {
-  const { data } = await api.post("/users", userData);
+  const { data } = await api.post('/users', userData);
   return data;
 };
 
@@ -176,35 +182,49 @@ export const getUserById = async (id) => {
 // ======================
 // отправить ответы (юзер)
 export const submitResult = async (resultData) => {
-  const { data } = await api.post("/results/submit", resultData);
+  const { data } = await api.post('/results/submit', resultData);
   return data;
 };
 
 export const submitListening = async (payload) => {
-  const { data } = await api.post("/results/submit-listening", payload);
+  const { data } = await api.post('/results/submit-listening', payload);
   return data;
 };
 
 export const submitReading = async (payload) => {
-  const { data } = await api.post("/results/submit-reading", payload);
+  const { data } = await api.post('/results/submit-reading', payload);
   return data;
 };
 
 export const submitWriting = async (payload) => {
-  const { data } = await api.post("/results/submit-writing", payload);
+  const { data } = await api.post('/results/submit-writing', payload);
   return data;
 };
 
 export const uploadSpeakingRecording = async (formData) => {
-  const { data } = await api.post("/speaking/upload", formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+  const { data } = await api.post('/speaking/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
   return data;
 };
 
 // ======================
 // ASSIGNMENTS (admin + user)
 // ======================
-export const createAssignment = async ({ userId, listeningTestId, readingTestId, writingTestId, speakingTestId }) => {
-  const { data } = await api.post("/assignments", { userId, listeningTestId, readingTestId, writingTestId, speakingTestId });
+export const createAssignment = async ({
+  userId,
+  listeningTestId,
+  readingTestId,
+  writingTestId,
+  speakingTestId,
+}) => {
+  const { data } = await api.post('/assignments', {
+    userId,
+    listeningTestId,
+    readingTestId,
+    writingTestId,
+    speakingTestId,
+  });
   return data;
 };
 
@@ -222,7 +242,7 @@ export const listAssignments = async () => {
 };
 
 export const getMyAssignment = async () => {
-  const { data } = await api.get("/assignments/me");
+  const { data } = await api.get('/assignments/me');
   return data;
 };
 
@@ -231,7 +251,6 @@ export const getUserResults = async (userId) => {
   const { data } = await api.get(`/results/user/${userId}`);
   return data;
 };
-
 
 // получить все результаты (админ)
 export const getAllResults = async () => {

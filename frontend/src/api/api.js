@@ -1,7 +1,6 @@
 import axios from 'axios';
-import dotenv from "dotenv";
-dotenv.config();
-const API_URL = process.env.BACKEND_URL; // адрес бэкенда
+
+const API_URL = 'http://localhost:1488/api'; // адрес бэкенда
 
 // 🔧 экземпляр axios
 const api = axios.create({

@@ -21,7 +21,23 @@ dotenv.config();
 const app = express();
 
 // ====== Middlewares ======
-app.use(cors({ origin: "http://localhost:5173", credentials: true })); // ⚡️ укажи фронт
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://ielts-simulation.vercel.app/", // твой ngrok фронт
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 app.use(cookieParser());
@@ -40,7 +56,7 @@ app.use("/api/speaking", speakingRouter);
 
 // ====== DB Connection ======
 const PORT = process.env.PORT || 1488;
-const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/ielts_app";
+const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://ivanovivan91902:VtrfM7pRey9pN7kS@cluster0.lcaijhq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 mongoose
   .connect(MONGO_URI, {

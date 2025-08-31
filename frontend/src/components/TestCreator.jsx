@@ -530,6 +530,11 @@ const TestCreator = () => {
 
   const renderQuestionEditor = (sectionIndex, partIndex, questionIndex, question) => {
     const updateQuestionField = (field, value) => updateQuestionInAudioPart(sectionIndex, partIndex, questionIndex, field, value);
+  };
+
+  // Рендеринг вопросов для Reading секции
+  const renderReadingQuestionEditor = (sectionIndex, partIndex, questionIndex, question) => {
+    const updateQuestionField = (field, value) => updateQuestionInReadingPart(sectionIndex, partIndex, questionIndex, field, value);
 
     switch (question.type) {
       case 'mcq':

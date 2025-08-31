@@ -272,8 +272,77 @@ const TestCreator = () => {
 
   // Добавить вопрос в readingPart
   const addQuestionToReadingPart = (sectionIndex, partIndex, questionType) => {
-    // Используем те же типы, что и для Listening
-    return addQuestionToAudioPart(sectionIndex, partIndex, questionType, true);
+    let newQuestion;
+    
+    switch (questionType) {
+      case 'mcq':
+        newQuestion = {
+          id: `q_${Date.now()}`,
+          type: 'mcq',
+          prompt: '',
+          options: ['', '', '', ''],
+          correctAnswer: ''
+        };
+        break;
+      case 'tfng':
+        newQuestion = {
+          id: `q_${Date.now()}`,
+          type: 'tfng',
+          prompt: '',
+          correctAnswer: ''
+        };
+        break;
+      case 'matching':
+        newQuestion = {
+          id: `q_${Date.now()}`,
+          type: 'matching',
+          prompt: '',
+          leftItems: [''],
+          rightItems: [''],
+          correctAnswers: []
+        };
+        break;
+      case 'table':
+        newQuestion = {
+          id: `q_${Date.now()}`,
+          type: 'table',
+          prompt: '',
+          columns: [''],
+          rows: [''],
+          correctAnswers: []
+        };
+        break;
+      case 'gap':
+        newQuestion = {
+          id: `q_${Date.now()}`,
+          type: 'gap',
+          prompt: '',
+          text: '',
+          gaps: []
+        };
+        break;
+      default:
+        newQuestion = {
+          id: `q_${Date.now()}`,
+          type: 'short',
+          prompt: '',
+          correctAnswer: ''
+        };
+    }
+
+    const updatedSections = testData.sections.map((section, sIndex) =>
+      sIndex === sectionIndex
+        ? {
+            ...section,
+            readingParts: section.readingParts.map((part, pIndex) =>
+              pIndex === partIndex 
+                ? { ...part, questions: [...part.questions, newQuestion] }
+                : part
+            )
+          }
+        : section
+    );
+    setTestData(prev => ({ ...prev, sections: updatedSections }));
   };
 
   // Обновить вопрос в readingPart

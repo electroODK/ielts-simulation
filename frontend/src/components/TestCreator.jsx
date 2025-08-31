@@ -63,19 +63,37 @@ const TestCreator = () => {
 
   // Добавить блок в выбранную секцию (по индексу)
   const addBlock = (sectionIndex, blockType) => {
-    const newBlock = {
-      blockType,
-      title: '',
-      instructions: '',
-      questions: [],
-      matching: {},
-      headings: {},
-      table: {},
-      gapText: {},
-      gapTable: {},
-      writing: {},
-      speaking: {}
-    };
+    let newBlock;
+    
+    if (blockType === 'speaking_questions') {
+      newBlock = {
+        blockType,
+        title: 'Speaking Questions',
+        instructions: 'Инструкции для speaking секции',
+        questions: []
+      };
+    } else if (blockType === 'writing_part1' || blockType === 'writing_part2') {
+      newBlock = {
+        blockType,
+        title: blockType === 'writing_part1' ? 'Writing Part 1' : 'Writing Part 2',
+        instructions: `Инструкции для ${blockType === 'writing_part1' ? 'Part 1' : 'Part 2'}`,
+        questions: []
+      };
+    } else {
+      newBlock = {
+        blockType,
+        title: '',
+        instructions: '',
+        questions: [],
+        matching: {},
+        headings: {},
+        table: {},
+        gapText: {},
+        gapTable: {},
+        writing: {},
+        speaking: {}
+      };
+    }
 
     const updatedSections = testData.sections.map((section, sIndex) =>
       sIndex === sectionIndex
@@ -407,6 +425,73 @@ const TestCreator = () => {
     setTestData(prev => ({ ...prev, sections: updatedSections }));
   };
 
+  // Добавить вопрос в Speaking блок
+  const addQuestionToSpeakingBlock = (sectionIndex, blockIndex) => {
+    const newQuestion = {
+      prompt: '',
+      type: 'speaking',
+      instructions: '',
+      timeLimit: 60,
+      sampleAnswer: ''
+    };
+
+    const updatedSections = testData.sections.map((section, sIndex) =>
+      sIndex === sectionIndex
+        ? {
+            ...section,
+            blocks: section.blocks.map((block, bIndex) =>
+              bIndex === blockIndex
+                ? { ...block, questions: [...block.questions, newQuestion] }
+                : block
+            )
+          }
+        : section
+    );
+    setTestData(prev => ({ ...prev, sections: updatedSections }));
+  };
+
+  // Добавить вопрос в Writing блок
+  const addQuestionToWritingBlock = (sectionIndex, blockIndex, partType) => {
+    let newQuestion;
+    
+    if (partType === 'writing_part1') {
+      newQuestion = {
+        prompt: '',
+        type: 'writing_part1',
+        instructions: '',
+        wordLimit: 150,
+        timeLimit: 20,
+        chartType: 'line', // line, bar, pie, table
+        chartData: '',
+        sampleAnswer: ''
+      };
+    } else {
+      newQuestion = {
+        prompt: '',
+        type: 'writing_part2',
+        instructions: '',
+        wordLimit: 250,
+        timeLimit: 40,
+        essayType: 'argumentative', // argumentative, discussion, problem-solution
+        sampleAnswer: ''
+      };
+    }
+
+    const updatedSections = testData.sections.map((section, sIndex) =>
+      sIndex === sectionIndex
+        ? {
+            ...section,
+            blocks: section.blocks.map((block, bIndex) =>
+              bIndex === blockIndex
+                ? { ...block, questions: [...block.questions, newQuestion] }
+                : block
+            )
+          }
+        : section
+    );
+    setTestData(prev => ({ ...prev, sections: updatedSections }));
+  };
+
   // Обновить вопрос
   const updateQuestion = (sectionIndex, blockIndex, questionIndex, field, value) => {
     const updatedSections = testData.sections.map((section, sIndex) =>
@@ -530,6 +615,197 @@ const TestCreator = () => {
 
   const renderQuestionEditor = (sectionIndex, partIndex, questionIndex, question) => {
     const updateQuestionField = (field, value) => updateQuestionInAudioPart(sectionIndex, partIndex, questionIndex, field, value);
+
+    switch (question.type) {
+      case 'mcq':
+        return (
+          <div className="question-editor">
+            <h5>Multiple Choice Question</h5>
+            <input
+              placeholder="Вопрос"
+              value={question.prompt}
+              onChange={(e) => updateQuestionField('prompt', e.target.value)}
+            />
+            {question.options.map((option, oIndex) => (
+              <input
+                key={oIndex}
+                placeholder={`Вариант ${oIndex + 1}`}
+                value={option}
+                onChange={(e) => {
+                  const newOptions = [...question.options];
+                  newOptions[oIndex] = e.target.value;
+                  updateQuestionField('options', newOptions);
+                }}
+              />
+            ))}
+            <input
+              placeholder="Правильный ответ"
+              value={question.correctAnswer}
+              onChange={(e) => updateQuestionField('correctAnswer', e.target.value)}
+            />
+          </div>
+        );
+
+      case 'tfng':
+        return (
+          <div className="question-editor">
+            <h5>True/False/Not Given Question</h5>
+            <input
+              placeholder="Утверждение"
+              value={question.prompt}
+              onChange={(e) => updateQuestionField('prompt', e.target.value)}
+            />
+            <select
+              value={question.correctAnswer}
+              onChange={(e) => updateQuestionField('correctAnswer', e.target.value)}
+            >
+              <option value="">Выберите ответ</option>
+              <option value="true">True</option>
+              <option value="false">False</option>
+              <option value="not_given">Not Given</option>
+            </select>
+          </div>
+        );
+
+      case 'matching':
+        return (
+          <div className="question-editor">
+            <h5>Matching Question</h5>
+            <input
+              placeholder="Инструкции"
+              value={question.prompt}
+              onChange={(e) => updateQuestionField('prompt', e.target.value)}
+            />
+            <div className="matching-items">
+              <div className="left-items">
+                <h6>Левые элементы:</h6>
+                {question.leftItems.map((item, index) => (
+                  <input
+                    key={index}
+                    placeholder={`Элемент ${index + 1}`}
+                    value={item}
+                    onChange={(e) => {
+                      const newItems = [...question.leftItems];
+                      newItems[index] = e.target.value;
+                      updateQuestionField('leftItems', newItems);
+                    }}
+                  />
+                ))}
+                <button onClick={() => {
+                  const newItems = [...question.leftItems, ''];
+                  updateQuestionField('leftItems', newItems);
+                }}>Добавить элемент</button>
+              </div>
+              <div className="right-items">
+                <h6>Правые элементы:</h6>
+                {question.rightItems.map((item, index) => (
+                  <input
+                    key={index}
+                    placeholder={`Элемент ${index + 1}`}
+                    value={item}
+                    onChange={(e) => {
+                      const newItems = [...question.rightItems];
+                      newItems[index] = e.target.value;
+                      updateQuestionField('rightItems', newItems);
+                    }}
+                  />
+                ))}
+                <button onClick={() => {
+                  const newItems = [...question.rightItems, ''];
+                  updateQuestionField('rightItems', newItems);
+                }}>Добавить элемент</button>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'table':
+        return (
+          <div className="question-editor">
+            <h5>Table Question</h5>
+            <input
+              placeholder="Вопрос"
+              value={question.prompt}
+              onChange={(e) => updateQuestionField('prompt', e.target.value)}
+            />
+            <div className="table-setup">
+              <div className="columns-setup">
+                <h6>Колонки:</h6>
+                {question.columns.map((col, index) => (
+                  <input
+                    key={index}
+                    placeholder={`Колонка ${index + 1}`}
+                    value={col}
+                    onChange={(e) => {
+                      const newColumns = [...question.columns];
+                      newColumns[index] = e.target.value;
+                      updateQuestionField('columns', newColumns);
+                    }}
+                  />
+                ))}
+                <button onClick={() => {
+                  const newColumns = [...question.columns, ''];
+                  updateQuestionField('columns', newColumns);
+                }}>Добавить колонку</button>
+              </div>
+              <div className="rows-setup">
+                <h6>Строки:</h6>
+                {question.rows.map((row, index) => (
+                  <input
+                    key={index}
+                    placeholder={`Строка ${index + 1}`}
+                    value={row}
+                    onChange={(e) => {
+                      const newRows = [...question.rows];
+                      newRows[index] = e.target.value;
+                      updateQuestionField('rows', newRows);
+                    }}
+                  />
+                ))}
+                <button onClick={() => {
+                  const newRows = [...question.rows, ''];
+                  updateQuestionField('rows', newRows);
+                }}>Добавить строку</button>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'gap':
+        return (
+          <div className="question-editor">
+            <h5>Gap Fill Question</h5>
+            <input
+              placeholder="Вопрос"
+              value={question.prompt}
+              onChange={(e) => updateQuestionField('prompt', e.target.value)}
+            />
+            <textarea
+              placeholder="Текст с пропусками (используйте {{gap}} для обозначения пропуска)"
+              value={question.text}
+              onChange={(e) => updateQuestionField('text', e.target.value)}
+              rows={4}
+            />
+          </div>
+        );
+
+      default:
+        return (
+          <div className="question-editor">
+            <h5>Short Answer Question</h5>
+            <input
+              placeholder="Вопрос"
+              value={question.prompt}
+              onChange={(e) => updateQuestionField('prompt', e.target.value)}
+            />
+            <input
+              placeholder="Правильный ответ"
+              value={question.correctAnswer}
+              onChange={(e) => updateQuestionField('correctAnswer', e.target.value)}
+            />
+          </div>
+        );
+    }
   };
 
   // Рендеринг вопросов для Reading секции
@@ -777,6 +1053,191 @@ const TestCreator = () => {
                 </div>
               ))}
               <button onClick={() => addQuestion(sectionIndex, blockIndex)}>Добавить вопрос</button>
+            </div>
+          </div>
+        );
+
+      case 'speaking_questions':
+        return (
+          <div className="block-editor">
+            <h4>Speaking Questions</h4>
+            <input
+              placeholder="Заголовок блока"
+              value={block.title}
+              onChange={(e) => updateBlockField('title', e.target.value)}
+            />
+            <textarea
+              placeholder="Инструкции"
+              value={block.instructions}
+              onChange={(e) => updateBlockField('instructions', e.target.value)}
+            />
+            <div className="questions-list">
+              {block.questions.map((question, qIndex) => (
+                <div key={qIndex} className="question-item">
+                  <input
+                    placeholder="Вопрос"
+                    value={question.prompt}
+                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'prompt', e.target.value)}
+                  />
+                  <textarea
+                    placeholder="Инструкции для студента"
+                    value={question.instructions}
+                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'instructions', e.target.value)}
+                    rows={3}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Временной лимит (секунды)"
+                    value={question.timeLimit}
+                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'timeLimit', parseInt(e.target.value) || 60)}
+                  />
+                  <textarea
+                    placeholder="Пример ответа"
+                    value={question.sampleAnswer}
+                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'sampleAnswer', e.target.value)}
+                    rows={4}
+                  />
+                  <div>
+                    <button className="btn-danger" onClick={() => deleteQuestion(sectionIndex, blockIndex, qIndex)}>Удалить вопрос</button>
+                  </div>
+                </div>
+              ))}
+              <button onClick={() => addQuestionToSpeakingBlock(sectionIndex, blockIndex)}>Добавить вопрос</button>
+            </div>
+          </div>
+        );
+
+      case 'writing_part1':
+        return (
+          <div className="block-editor">
+            <h4>Writing Part 1</h4>
+            <input
+              placeholder="Заголовок блока"
+              value={block.title}
+              onChange={(e) => updateBlockField('title', e.target.value)}
+            />
+            <textarea
+              placeholder="Инструкции"
+              value={block.instructions}
+              onChange={(e) => updateBlockField('instructions', e.target.value)}
+            />
+            <div className="questions-list">
+              {block.questions.map((question, qIndex) => (
+                <div key={qIndex} className="question-item">
+                  <input
+                    placeholder="Задание"
+                    value={question.prompt}
+                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'prompt', e.target.value)}
+                  />
+                  <textarea
+                    placeholder="Инструкции для студента"
+                    value={question.instructions}
+                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'instructions', e.target.value)}
+                    rows={3}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Лимит слов"
+                    value={question.wordLimit}
+                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'wordLimit', parseInt(e.target.value) || 150)}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Временной лимит (минуты)"
+                    value={question.timeLimit}
+                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'timeLimit', parseInt(e.target.value) || 20)}
+                  />
+                  <select
+                    value={question.chartType}
+                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'chartType', e.target.value)}
+                  >
+                    <option value="line">Линейный график</option>
+                    <option value="bar">Столбчатая диаграмма</option>
+                    <option value="pie">Круговая диаграмма</option>
+                    <option value="table">Таблица</option>
+                  </select>
+                  <textarea
+                    placeholder="Данные для графика/таблицы"
+                    value={question.chartData}
+                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'chartData', e.target.value)}
+                    rows={4}
+                  />
+                  <textarea
+                    placeholder="Пример ответа"
+                    value={question.sampleAnswer}
+                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'sampleAnswer', e.target.value)}
+                    rows={4}
+                  />
+                  <div>
+                    <button className="btn-danger" onClick={() => deleteQuestion(sectionIndex, blockIndex, qIndex)}>Удалить задание</button>
+                  </div>
+                </div>
+              ))}
+              <button onClick={() => addQuestionToWritingBlock(sectionIndex, blockIndex, 'writing_part1')}>Добавить задание</button>
+            </div>
+          </div>
+        );
+
+      case 'writing_part2':
+        return (
+          <div className="block-editor">
+            <h4>Writing Part 2</h4>
+            <input
+              placeholder="Заголовок блока"
+              value={block.title}
+              onChange={(e) => updateBlockField('title', e.target.value)}
+            />
+            <textarea
+              placeholder="Инструкции"
+              value={block.instructions}
+              onChange={(e) => updateBlockField('instructions', e.target.value)}
+            />
+            <div className="questions-list">
+              {block.questions.map((question, qIndex) => (
+                <div key={qIndex} className="question-item">
+                  <input
+                    placeholder="Задание"
+                    value={question.prompt}
+                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'prompt', e.target.value)}
+                  />
+                  <textarea
+                    placeholder="Инструкции для студента"
+                    value={question.instructions}
+                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'instructions', e.target.value)}
+                    rows={3}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Лимит слов"
+                    value={question.wordLimit}
+                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'wordLimit', parseInt(e.target.value) || 250)}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Временной лимит (минуты)"
+                    value={question.timeLimit}
+                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'timeLimit', parseInt(e.target.value) || 40)}
+                  />
+                  <select
+                    value={question.essayType}
+                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'essayType', e.target.value)}
+                  >
+                    <option value="argumentative">Аргументативное эссе</option>
+                    <option value="discussion">Дискуссионное эссе</option>
+                    <option value="problem-solution">Проблемно-решение</option>
+                  </select>
+                  <textarea
+                    placeholder="Пример ответа"
+                    value={question.sampleAnswer}
+                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'sampleAnswer', e.target.value)}
+                    rows={4}
+                  />
+                  <div>
+                    <button className="btn-danger" onClick={() => deleteQuestion(sectionIndex, blockIndex, qIndex)}>Удалить задание</button>
+                  </div>
+                </div>
+              ))}
+              <button onClick={() => addQuestionToWritingBlock(sectionIndex, blockIndex, 'writing_part2')}>Добавить задание</button>
             </div>
           </div>
         );
@@ -1373,7 +1834,7 @@ const TestCreator = () => {
                             <span className="question-number">Вопрос {questionIndex + 1}</span>
                             <button className="btn-danger" onClick={() => deleteQuestionFromReadingPart(sectionIndex, partIndex, questionIndex)}>Удалить</button>
                           </div>
-                          {renderQuestionEditor(sectionIndex, partIndex, questionIndex, question)}
+                          {renderReadingQuestionEditor(sectionIndex, partIndex, questionIndex, question)}
                         </div>
                       ))}
                     </div>

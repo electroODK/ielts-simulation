@@ -15,7 +15,7 @@ const AdminPanel = () => {
   const [tests, setTests] = useState([]);
   const [results, setResults] = useState([]);
   const [assignments, setAssignments] = useState([]);
-  const [activeTab, setActiveTab] = useState('main');
+  const [activeTab, setActiveTab] = useState('dashboard');
 
   const [newUser, setNewUser] = useState({ username: "", password: "", role: "user" });
   const [newTest, setNewTest] = useState({ name: "", description: "" });
@@ -160,6 +160,11 @@ const AdminPanel = () => {
             </div>
           ) : (
             <>
+              {/* Debug info */}
+              <div style={{ marginBottom: '20px', padding: '10px', background: '#f8f9fa', borderRadius: '8px', fontSize: '14px' }}>
+                <strong>Debug:</strong> Активная вкладка: {activeTab}
+              </div>
+
               {activeTab === 'dashboard' && (
                 <DashboardView 
                   users={users} 
@@ -207,7 +212,12 @@ const AdminPanel = () => {
 
               {activeTab === 'testCreator' && <TestCreator />}
               {activeTab === 'testDemo' && <TestDemo />}
-              {activeTab === 'speakingChecker' && <SpeakerCheckerPanel />}
+              {activeTab === 'speakingChecker' && (
+                <div>
+                  <h2>🎤 Speaking Checker Panel</h2>
+                  <SpeakerCheckerPanel />
+                </div>
+              )}
               {activeTab === 'writingChecker' && <WritingCheckerPanel />}
             </>
           )}

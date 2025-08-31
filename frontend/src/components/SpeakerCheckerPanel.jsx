@@ -11,6 +11,8 @@ const SpeakerCheckerPanel = () => {
   const [grades, setGrades] = useState({}); // { userId: { questionId: grade } }
   const [submitting, setSubmitting] = useState(false);
 
+  console.log('SpeakerCheckerPanel render - user:', user, 'loading:', loading, 'error:', error);
+
   // Загрузить список пользователей
   const loadUsers = async () => {
     try {
@@ -69,8 +71,11 @@ const SpeakerCheckerPanel = () => {
   };
 
   useEffect(() => {
+    console.log('SpeakerCheckerPanel useEffect - user:', user);
     if (user) {
       loadUsers();
+    } else {
+      console.log('SpeakerCheckerPanel: user is null/undefined');
     }
   }, [user]);
 

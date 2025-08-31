@@ -21,6 +21,17 @@ const WritingCheckerPanel = () => {
     try {
       console.log("🔍 Текущий пользователь:", user);
       console.log("🔑 Роль пользователя:", user?.role);
+      console.log("🆔 ID пользователя:", user?._id);
+      
+      // Проверяем токен
+      const token = localStorage.getItem('access_token');
+      console.log("🎫 Токен в localStorage:", token ? 'Есть' : 'Нет');
+      
+      if (!token) {
+        throw new Error('Токен доступа не найден. Войдите в систему заново.');
+      }
+      
+      console.log("📡 Начинаем загрузку данных...");
       
       const [r, u] = await Promise.all([getAllResults(), getUsers()]);
       console.log("📊 Загружено результатов:", r.length);
@@ -33,6 +44,12 @@ const WritingCheckerPanel = () => {
       setUsers(regularUsers);
     } catch (error) {
       console.error('❌ Ошибка загрузки данных:', error);
+      console.error('❌ Детали ошибки:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        statusText: error.response?.statusText
+      });
       setError(error.message || 'Ошибка загрузки данных');
     } finally {
       setLoading(false);

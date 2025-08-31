@@ -9,7 +9,9 @@
     "start": "vite",
     "user": "node adduser.js",
     "test-trai": "node test-trai.js",
-    "create-writing-checker": "node create-writing-checker.js"
+    "create-writing-checker": "node create-writing-checker.js",
+    "check-users": "node check-users.js",
+    "test-api": "node test-api.js"
   },
   "keywords": [],
   "author": "",

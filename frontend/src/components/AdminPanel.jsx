@@ -132,20 +132,6 @@ const AdminPanel = () => {
             </form>
           </section>
 
-          <section>
-            <h2>Create test</h2>
-            <form onSubmit={handleCreateTest}>
-              <input placeholder="name" value={newTest.name} onChange={(e)=>setNewTest(v=>({...v, name:e.target.value}))} />
-              <input placeholder="description" value={newTest.description} onChange={(e)=>setNewTest(v=>({...v, description:e.target.value}))} />
-              <button type="submit">Create</button>
-            </form>
-            <div style={{ marginTop: 8 }}>
-              <form onSubmit={async (e)=>{ e.preventDefault(); const file = e.currentTarget.pdf.files[0]; if (!file) return; const form = new FormData(); form.append('pdf', file); await api.post('/tests/upload-pdf', form, { headers: { 'Content-Type': 'multipart/form-data' } }); alert('PDF uploaded'); }}>
-                <input type="file" name="pdf" accept="application/pdf" />
-                <button type="submit">Upload PDF</button>
-              </form>
-            </div>
-          </section>
 
           <section>
             <h2>Assign test to user</h2>
@@ -162,7 +148,7 @@ const AdminPanel = () => {
             </form>
           </section>
 
-          <section>
+          {/* <section>
             <h2>Assign 4 sections to user</h2>
             <form onSubmit={handleCreateAssignment}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
@@ -199,7 +185,7 @@ const AdminPanel = () => {
                 ))}
               </ul>
             </div>
-          </section>
+          </section> */}
 
           <section>
             <h2>Results</h2>
@@ -237,4 +223,3 @@ const AdminPanel = () => {
 };
 
 export default AdminPanel;
-

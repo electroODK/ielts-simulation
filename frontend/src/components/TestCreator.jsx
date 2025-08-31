@@ -377,8 +377,13 @@ const TestCreator = () => {
     setTestData(prev => ({ ...prev, sections: updatedSections }));
   };
 
-  // Подсчет вопросов в audioPart с учетом специфики типов
+  // Подсчет вопросов в audioPart (Listening) - каждый вопрос считается отдельно
   const countQuestionsInPart = (part) => {
+    return part.questions.length; // Каждый вопрос = 1, независимо от типа
+  };
+
+  // Подсчет вопросов в readingPart с учетом специфики типов (старая логика)
+  const countQuestionsInReadingPart = (part) => {
     return part.questions.reduce((sum, q) => {
       if (q.type === 'table') {
         const cols = Array.isArray(q.columns) ? q.columns.length : 0;
@@ -414,25 +419,25 @@ const TestCreator = () => {
           return;
         }
       }
-      // Валидация: Listening лимиты с учетом типов
+      // Валидация: Listening лимиты - каждый вопрос считается отдельно
       const listeningSections = testData.sections.filter(s => s.type === 'listening');
       for (const s of listeningSections) {
         const perPartCounts = s.audioParts.map(p => countQuestionsInPart(p));
         if (perPartCounts.some(c => c > 10)) {
-          alert('В каждой части Listening не должно быть больше 10 вопросов.');
+          alert('В каждой части Listening не должно быть больше 10 вопросов (каждый вопрос считается отдельно).');
           return;
         }
         const total = perPartCounts.reduce((a, b) => a + b, 0);
         if (total > 40) {
-          alert('В Listening суммарно не больше 40 вопросов.');
+          alert('В Listening суммарно не больше 40 вопросов (каждый вопрос считается отдельно).');
           return;
         }
       }
 
-      // Валидация: Reading лимиты (3 части, по 15 максимум, всего 40)
+      // Валидация: Reading лимиты (3 части, по 15 максимум, всего 40) - логика остается прежней
       const readingSections = testData.sections.filter(s => s.type === 'reading');
       for (const s of readingSections) {
-        const perPartCounts = (s.readingParts || []).map(p => countQuestionsInPart(p));
+        const perPartCounts = (s.readingParts || []).map(p => countQuestionsInReadingPart(p));
         if (perPartCounts.some(c => c > 15)) {
           alert('В каждой части Reading не должно быть больше 15 вопросов.');
           return;
@@ -1156,12 +1161,12 @@ const TestCreator = () => {
 
                           {section.type === 'listening' ? (
                 <div className="audio-parts-creator">
-                  <h4>Аудио части (4 части, максимум 40 вопросов всего)</h4>
+                  <h4>Аудио части (4 части, максимум 40 вопросов всего, каждый вопрос считается отдельно)</h4>
                   {(() => {
                     const totalQuestions = section.audioParts.reduce((sum, part) => sum + part.questions.length, 0);
                     return (
                       <div className="total-questions-summary">
-                        <span>Всего вопросов: {totalQuestions}/40</span>
+                        <span>Всего вопросов: {totalQuestions}/40 (каждый вопрос считается отдельно)</span>
                         {totalQuestions > 40 && (
                           <span className="warning">⚠️ Превышен общий лимит вопросов!</span>
                         )}
@@ -1186,21 +1191,11 @@ const TestCreator = () => {
                     </div>
                     
                     {(() => {
-                      const countQuestionsInPartLocal = (p) => p.questions.reduce((sum, q) => {
-                        if (q.type === 'table') {
-                          const cols = Array.isArray(q.columns) ? q.columns.length : 0;
-                          return sum + (cols || 0);
-                        }
-                        if (q.type === 'gap') {
-                          const gaps = ((q.text || '').match(/\{\{\s*gap\s*\}\}/g) || []).length;
-                          return sum + (gaps || 0);
-                        }
-                        return sum + 1;
-                      }, 0);
+                      const countQuestionsInPartLocal = (p) => p.questions.length; // Каждый вопрос = 1
                       const partCount = countQuestionsInPartLocal(part);
                       return (
                         <div className="questions-summary">
-                          <span>Вопросов: {partCount}/10</span>
+                          <span>Вопросов: {partCount}/10 (каждый вопрос считается отдельно)</span>
                           {partCount > 10 && (
                             <span className="warning">⚠️ Превышен лимит вопросов!</span>
                           )}
@@ -1236,7 +1231,7 @@ const TestCreator = () => {
               <div className="reading-parts-creator">
                 <h4>Пассажи для чтения (3 части, максимум 40 вопросов всего)</h4>
                 {(() => {
-                  const totalQuestions = (section.readingParts || []).reduce((sum, part) => sum + countQuestionsInPart(part), 0);
+                  const totalQuestions = (section.readingParts || []).reduce((sum, part) => sum + countQuestionsInReadingPart(part), 0);
                   return (
                     <div className="total-questions-summary">
                       <span>Всего вопросов: {totalQuestions}/40</span>
@@ -1276,7 +1271,7 @@ const TestCreator = () => {
                       />
                     </div>
                     {(() => {
-                      const partCount = countQuestionsInPart(part);
+                      const partCount = countQuestionsInReadingPart(part);
                       return (
                         <div className="questions-summary">
                           <span>Вопросов: {partCount}/15</span>

@@ -295,5 +295,13 @@ export const checkWritingWithTRAI = async (task1Text, task2Text, taskType = "bot
   return data;
 };
 
+// ======================
+// 🎤 SPEAKING GRADES
+// ======================
+export const submitSpeakingGrades = async (gradesData) => {
+  const { data } = await api.post('/speaking/grades', gradesData);
+  return data;
+};
+
 export default api;
  

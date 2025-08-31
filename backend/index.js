@@ -21,23 +21,10 @@ dotenv.config();
 const app = express();
 
 // ====== Middlewares ======
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://ielts-simulation.vercel.app/", // твой ngrok фронт
-];
-
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  })
-);
+app.use(cors({ 
+  origin: ["http://localhost:5173", "https://c1b72a908cc2.ngrok-free.app"], 
+  credentials: true 
+})); // ⚡️ укажи фронт
 
 app.use(express.json());
 app.use(cookieParser());

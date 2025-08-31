@@ -1,28 +1,49 @@
 import React, { useEffect, useState } from "react";
 import { getAllResults, updateResult, getUsers, checkWritingWithTRAI } from "../api/api";
+import { useAuth } from "./AuthContext";
 import "./WritingCheckerPanel.css";
 
 const WritingCheckerPanel = () => {
+  const { user } = useAuth();
   const [results, setResults] = useState([]);
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedResult, setSelectedResult] = useState(null);
   const [isTRAIChecking, setIsTRAIChecking] = useState(false);
   const [traiResult, setTraiResult] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const load = async () => {
+    setLoading(true);
+    setError(null);
+    
     try {
+      console.log("🔍 Текущий пользователь:", user);
+      console.log("🔑 Роль пользователя:", user?.role);
+      
       const [r, u] = await Promise.all([getAllResults(), getUsers()]);
+      console.log("📊 Загружено результатов:", r.length);
+      console.log("👥 Загружено пользователей:", u.length);
+      
       setResults(r);
       // Фильтруем только обычных пользователей (не админов)
       const regularUsers = u.filter(user => user.role === 'user');
+      console.log("👤 Обычных пользователей:", regularUsers.length);
       setUsers(regularUsers);
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('❌ Ошибка загрузки данных:', error);
+      setError(error.message || 'Ошибка загрузки данных');
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { 
+    if (user) {
+      load(); 
+    }
+  }, [user]);
 
   const grade = async (id, band, comment) => {
     try {
@@ -103,41 +124,86 @@ const WritingCheckerPanel = () => {
   const UserList = () => (
     <div className="writing-checker-panel">
       <h1>Writing Checker Panel</h1>
-      <div className="users-grid">
-        {users.map(user => {
-          const userResults = getUserResults(user._id);
-          const pendingCount = userResults.filter(r => !r.writing?.band).length;
-          const gradedCount = userResults.filter(r => r.writing?.band).length;
-          
-          return (
-            <div 
-              key={user._id} 
-              className={`user-card ${pendingCount > 0 ? 'has-pending' : ''}`}
-              onClick={() => setSelectedUser(user)}
-            >
-              <div className="user-info">
-                <h3>{user.username}</h3>
-                <p className="user-role">{user.role}</p>
-              </div>
-              <div className="results-summary">
-                <div className="pending-count">
-                  <span className="count">{pendingCount}</span>
-                  <span className="label">Ожидают оценки</span>
-                </div>
-                <div className="graded-count">
-                  <span className="count">{gradedCount}</span>
-                  <span className="label">Оценены</span>
-                </div>
-              </div>
-              {pendingCount > 0 && (
-                <div className="pending-indicator">
-                  ⚠️ Требует внимания
-                </div>
-              )}
-            </div>
-          );
-        })}
+      
+      {/* Отладочная информация */}
+      <div className="debug-info" style={{ 
+        background: '#f8f9fa', 
+        padding: '15px', 
+        borderRadius: '8px', 
+        marginBottom: '20px',
+        fontSize: '14px'
+      }}>
+        <h3>🔍 Отладочная информация:</h3>
+        <p><strong>Текущий пользователь:</strong> {user?.username || 'Не определен'}</p>
+        <p><strong>Роль:</strong> {user?.role || 'Не определена'}</p>
+        <p><strong>ID пользователя:</strong> {user?._id || 'Не определен'}</p>
+        <p><strong>Статус загрузки:</strong> {loading ? 'Загружается...' : 'Загружено'}</p>
+        <p><strong>Ошибка:</strong> {error || 'Нет'}</p>
       </div>
+
+      {loading ? (
+        <div className="loading">
+          <h3>🔄 Загрузка данных...</h3>
+          <p>Пожалуйста, подождите...</p>
+        </div>
+      ) : error ? (
+        <div className="error-message">
+          <h3>❌ Ошибка загрузки</h3>
+          <p>{error}</p>
+          <button onClick={load} className="retry-button">
+            🔄 Попробовать снова
+          </button>
+        </div>
+      ) : users.length === 0 ? (
+        <div className="no-users">
+          <h3>👥 Пользователи не найдены</h3>
+          <p>Возможные причины:</p>
+          <ul>
+            <li>У вас нет прав для просмотра пользователей</li>
+            <li>В системе нет пользователей с ролью 'user'</li>
+            <li>Проблема с API или базой данных</li>
+          </ul>
+          <button onClick={load} className="retry-button">
+            🔄 Обновить
+          </button>
+        </div>
+      ) : (
+        <div className="users-grid">
+          {users.map(user => {
+            const userResults = getUserResults(user._id);
+            const pendingCount = userResults.filter(r => !r.writing?.band).length;
+            const gradedCount = userResults.filter(r => r.writing?.band).length;
+            
+            return (
+              <div 
+                key={user._id} 
+                className={`user-card ${pendingCount > 0 ? 'has-pending' : ''}`}
+                onClick={() => setSelectedUser(user)}
+              >
+                <div className="user-info">
+                  <h3>{user.username}</h3>
+                  <p className="user-role">{user.role}</p>
+                </div>
+                <div className="results-summary">
+                  <div className="pending-count">
+                    <span className="count">{pendingCount}</span>
+                    <span className="label">Ожидают оценки</span>
+                  </div>
+                  <div className="graded-count">
+                    <span className="count">{gradedCount}</span>
+                    <span className="label">Оценены</span>
+                  </div>
+                </div>
+                {pendingCount > 0 && (
+                  <div className="pending-indicator">
+                    ⚠️ Требует внимания
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 

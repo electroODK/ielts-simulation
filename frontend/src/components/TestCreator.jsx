@@ -112,7 +112,7 @@ const TestCreator = () => {
 
     const updatedSections = testData.sections.map((section, sIndex) =>
       sIndex === sectionIndex
-        ? { ...section, blocks: [...section.blocks, newBlock] }
+        ? { ...section, blocks: [...(section.blocks || []), newBlock] }
         : section
     );
 
@@ -135,7 +135,7 @@ const TestCreator = () => {
       sIndex === sectionIndex
         ? {
             ...section,
-            blocks: section.blocks.map((block, bIndex) =>
+            blocks: (section.blocks || []).map((block, bIndex) =>
               bIndex === blockIndex ? { ...block, [field]: value } : block
             )
           }
@@ -150,7 +150,7 @@ const TestCreator = () => {
       sIndex === sectionIndex
         ? {
             ...section,
-            audioParts: section.audioParts.map((part, pIndex) =>
+            audioParts: (section.audioParts || []).map((part, pIndex) =>
               pIndex === partIndex ? { ...part, [field]: value } : part
             )
           }
@@ -165,7 +165,7 @@ const TestCreator = () => {
       sIndex === sectionIndex
         ? {
             ...section,
-            readingParts: section.readingParts.map((part, pIndex) =>
+            readingParts: (section.readingParts || []).map((part, pIndex) =>
               pIndex === partIndex ? { ...part, [field]: value } : part
             )
           }
@@ -184,7 +184,7 @@ const TestCreator = () => {
   const deleteBlock = (sectionIndex, blockIndex) => {
     const updatedSections = testData.sections.map((section, sIndex) =>
       sIndex === sectionIndex
-        ? { ...section, blocks: section.blocks.filter((_, bIndex) => bIndex !== blockIndex) }
+        ? { ...section, blocks: (section.blocks || []).filter((_, bIndex) => bIndex !== blockIndex) }
         : section
     );
     setTestData(prev => ({ ...prev, sections: updatedSections }));
@@ -254,9 +254,9 @@ const TestCreator = () => {
       sIndex === sectionIndex
         ? {
             ...section,
-            audioParts: section.audioParts.map((part, pIndex) =>
+            audioParts: (section.audioParts || []).map((part, pIndex) =>
               pIndex === partIndex 
-                ? { ...part, questions: [...part.questions, newQuestion] }
+                ? { ...part, questions: [...(part.questions || []), newQuestion] }
                 : part
             )
           }
@@ -271,11 +271,33 @@ const TestCreator = () => {
       sIndex === sectionIndex
         ? {
             ...section,
-            audioParts: section.audioParts.map((part, pIndex) =>
+            audioParts: (section.audioParts || []).map((part, pIndex) =>
               pIndex === partIndex
                 ? {
                     ...part,
-                    questions: part.questions.map((question, qIndex) =>
+                    questions: (part.questions || []).map((question, qIndex) =>
+                      qIndex === questionIndex ? { ...question, [field]: value } : question
+                    )
+                  }
+                : part
+            )
+          }
+        : section
+    );
+    setTestData(prev => ({ ...prev, sections: updatedSections }));
+  };
+
+  // Обновить вопрос в audioPart
+  const updateQuestionInAudioPart = (sectionIndex, partIndex, questionIndex, field, value) => {
+    const updatedSections = testData.sections.map((section, sIndex) =>
+      sIndex === sectionIndex
+        ? {
+            ...section,
+            audioParts: (section.audioParts || []).map((part, pIndex) =>
+              pIndex === partIndex
+                ? {
+                    ...part,
+                    questions: (part.questions || []).map((question, qIndex) =>
                       qIndex === questionIndex ? { ...question, [field]: value } : question
                     )
                   }
@@ -293,9 +315,9 @@ const TestCreator = () => {
       sIndex === sectionIndex
         ? {
             ...section,
-            audioParts: section.audioParts.map((part, pIndex) =>
+            audioParts: (section.audioParts || []).map((part, pIndex) =>
               pIndex === partIndex
-                ? { ...part, questions: part.questions.filter((_, qIndex) => qIndex !== questionIndex) }
+                ? { ...part, questions: (part.questions || []).filter((_, qIndex) => qIndex !== questionIndex) }
                 : part
             )
           }
@@ -373,7 +395,7 @@ const TestCreator = () => {
       sIndex === sectionIndex
         ? {
             ...section,
-            readingParts: section.readingParts.map((part, pIndex) =>
+            readingParts: (section.readingParts || []).map((part, pIndex) =>
               pIndex === partIndex 
                 ? { ...part, questions: [...part.questions, newQuestion] }
                 : part
@@ -392,11 +414,11 @@ const TestCreator = () => {
       sIndex === sectionIndex
         ? {
             ...section,
-            readingParts: section.readingParts.map((part, pIndex) =>
+            readingParts: (section.readingParts || []).map((part, pIndex) =>
               pIndex === partIndex
                 ? {
                     ...part,
-                    questions: part.questions.map((question, qIndex) =>
+                    questions: (part.questions || []).map((question, qIndex) =>
                       qIndex === questionIndex ? { ...question, [field]: value } : question
                     )
                   }
@@ -414,9 +436,9 @@ const TestCreator = () => {
       sIndex === sectionIndex
         ? {
             ...section,
-            readingParts: section.readingParts.map((part, pIndex) =>
+            readingParts: (section.readingParts || []).map((part, pIndex) =>
               pIndex === partIndex
-                ? { ...part, questions: part.questions.filter((_, qIndex) => qIndex !== questionIndex) }
+                ? { ...part, questions: (part.questions || []).filter((_, qIndex) => qIndex !== questionIndex) }
                 : part
             )
           }
@@ -437,9 +459,9 @@ const TestCreator = () => {
       sIndex === sectionIndex
         ? {
             ...section,
-            blocks: section.blocks.map((block, bIndex) =>
+            blocks: (section.blocks || []).map((block, bIndex) =>
               bIndex === blockIndex
-                ? { ...block, questions: [...block.questions, newQuestion] }
+                ? { ...block, questions: [...(block.questions || []), newQuestion] }
                 : block
             )
           }
@@ -467,9 +489,9 @@ const TestCreator = () => {
       sIndex === sectionIndex
         ? {
             ...section,
-            blocks: section.blocks.map((block, bIndex) =>
+            blocks: (section.blocks || []).map((block, bIndex) =>
               bIndex === blockIndex
-                ? { ...block, questions: [...block.questions, newQuestion] }
+                ? { ...block, questions: [...(block.questions || []), newQuestion] }
                 : block
             )
           }
@@ -516,9 +538,9 @@ const TestCreator = () => {
       sIndex === sectionIndex
         ? {
             ...section,
-            blocks: section.blocks.map((block, bIndex) =>
+            blocks: (section.blocks || []).map((block, bIndex) =>
               bIndex === blockIndex
-                ? { ...block, questions: [...block.questions, newQuestion] }
+                ? { ...block, questions: [...(block.questions || []), newQuestion] }
                 : block
             )
           }
@@ -535,11 +557,11 @@ const TestCreator = () => {
       sIndex === sectionIndex
         ? {
             ...section,
-            blocks: section.blocks.map((block, bIndex) =>
+            blocks: (section.blocks || []).map((block, bIndex) =>
               bIndex === blockIndex
                 ? {
                     ...block,
-                    questions: block.questions.map((question, qIndex) =>
+                    questions: (block.questions || []).map((question, qIndex) =>
                       qIndex === questionIndex ? { ...question, [field]: value } : question
                     )
                   }
@@ -557,9 +579,9 @@ const TestCreator = () => {
       sIndex === sectionIndex
         ? {
             ...section,
-            blocks: section.blocks.map((block, bIndex) =>
+            blocks: (section.blocks || []).map((block, bIndex) =>
               bIndex === blockIndex
-                ? { ...block, questions: block.questions.filter((_, qIndex) => qIndex !== questionIndex) }
+                ? { ...block, questions: (block.questions || []).filter((_, qIndex) => qIndex !== questionIndex) }
                 : block
             )
           }
@@ -570,12 +592,12 @@ const TestCreator = () => {
 
   // Подсчет вопросов в audioPart (Listening) - каждый вопрос считается отдельно
   const countQuestionsInPart = (part) => {
-    return part.questions.length; // Каждый вопрос = 1, независимо от типа
+    return (part.questions || []).length; // Каждый вопрос = 1, независимо от типа
   };
 
   // Подсчет вопросов в readingPart с учетом специфики типов (старая логика)
   const countQuestionsInReadingPart = (part) => {
-    return part.questions.reduce((sum, q) => {
+    return (part.questions || []).reduce((sum, q) => {
       if (q.type === 'table') {
         const cols = Array.isArray(q.columns) ? q.columns.length : 0;
         return sum + (cols || 0);
@@ -613,7 +635,7 @@ const TestCreator = () => {
       // Валидация: Listening лимиты - каждый вопрос считается отдельно
       const listeningSections = testData.sections.filter(s => s.type === 'listening');
       for (const s of listeningSections) {
-        const perPartCounts = s.audioParts.map(p => countQuestionsInPart(p));
+        const perPartCounts = (s.audioParts || []).map(p => countQuestionsInPart(p));
         if (perPartCounts.some(c => c > 10)) {
           alert('В каждой части Listening не должно быть больше 10 вопросов (каждый вопрос считается отдельно).');
           return;

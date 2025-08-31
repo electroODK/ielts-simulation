@@ -8,6 +8,7 @@ import resultsRouter from "./src/routes/result.routes.js";
 import usersAdminRouter from "./src/routes/user.admin.routes.js";
 import assignmentsRouter from "./src/routes/assignment.routes.js";
 import speakingRouter from "./src/routes/speaking.routes.js";
+import aiRouter from "./src/routes/ai.routes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
@@ -40,6 +41,7 @@ app.use("/api/results", resultsRouter);
 app.use("/api/users", usersAdminRouter);
 app.use("/api/assignments", assignmentsRouter);
 app.use("/api/speaking", speakingRouter);
+app.use("/api/ai", aiRouter);
 
 // ====== DB Connection ======
 const PORT = process.env.PORT || 1488;

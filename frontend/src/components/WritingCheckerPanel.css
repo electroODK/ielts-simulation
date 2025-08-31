@@ -437,3 +437,175 @@
   color: #e74c3c;
   border: 1px solid #f1948a;
 }
+
+/* TRAI Check Section */
+.trai-check-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  color: white;
+}
+
+.trai-check-section h4 {
+  margin: 0 0 15px 0;
+  font-size: 1.2em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trai-actions {
+  margin-bottom: 20px;
+}
+
+.trai-check-button {
+  background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.trai-check-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.trai-check-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* TRAI Result Display */
+.trai-result {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.trai-score h5 {
+  margin: 0 0 15px 0;
+  font-size: 1.3em;
+  color: #ffd700;
+  text-align: center;
+}
+
+.trai-criteria {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.trai-criteria p {
+  margin: 5px 0;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  font-size: 0.9em;
+}
+
+.trai-feedback,
+.trai-strengths,
+.trai-improvements,
+.trai-recommendations {
+  margin-bottom: 20px;
+}
+
+.trai-feedback h6,
+.trai-strengths h6,
+.trai-improvements h6,
+.trai-recommendations h6 {
+  margin: 0 0 10px 0;
+  color: #ffd700;
+  font-size: 1em;
+}
+
+.trai-feedback p,
+.trai-recommendations p {
+  margin: 0;
+  line-height: 1.6;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 12px;
+  border-radius: 6px;
+}
+
+.trai-strengths ul,
+.trai-improvements ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.trai-strengths li,
+.trai-improvements li {
+  margin: 5px 0;
+  padding: 6px 0;
+}
+
+.apply-trai-grade-button {
+  background: linear-gradient(45deg, #00b894, #00a085);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-top: 15px;
+}
+
+.apply-trai-grade-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Enhanced Grading Section */
+.grading-section h4 {
+  color: #2c3e50;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 8px;
+  margin-bottom: 20px;
+}
+
+/* Responsive Design for TRAI */
+@media (max-width: 768px) {
+  .trai-criteria {
+    grid-template-columns: 1fr;
+  }
+  
+  .trai-check-section {
+    padding: 15px;
+  }
+  
+  .trai-result {
+    padding: 15px;
+  }
+}
+
+/* Loading Animation for TRAI */
+.trai-check-button:disabled::after {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s ease-in-out infinite;
+  margin-left: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

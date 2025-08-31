@@ -19,7 +19,7 @@ router.post("/", authenticate, authorize("admin"), async (req, res) => {
 });
 
 // list users
-router.get("/", authenticate, authorize("admin"), async (_req, res) => {
+router.get("/", authenticate, authorize("admin", "writing-checker", "speaking-checker"), async (_req, res) => {
   const users = await User.find({}, { password: 0, access_token: 0, refresh_token: 0 });
   return res.json(users);
 });

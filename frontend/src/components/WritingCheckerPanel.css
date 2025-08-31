@@ -605,3 +605,94 @@
   animation: spin 1s ease-in-out infinite;
   margin-left: 8px;
 }
+
+/* Debug Info */
+.debug-info {
+  background: #f8f9fa !important;
+  border: 1px solid #dee2e6;
+  font-family: 'Courier New', monospace;
+}
+
+.debug-info h3 {
+  color: #495057;
+  margin: 0 0 10px 0;
+  font-size: 1.1em;
+}
+
+.debug-info p {
+  margin: 5px 0;
+  color: #6c757d;
+}
+
+/* Loading States */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #7f8c8d;
+}
+
+.loading h3 {
+  color: #3498db;
+  margin-bottom: 15px;
+}
+
+/* Error Message */
+.error-message {
+  text-align: center;
+  padding: 40px;
+  color: #e74c3c;
+  background: #fdf2f2;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+}
+
+.error-message h3 {
+  color: #dc2626;
+  margin-bottom: 15px;
+}
+
+/* No Users */
+.no-users {
+  text-align: center;
+  padding: 40px;
+  color: #6b7280;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.no-users h3 {
+  color: #374151;
+  margin-bottom: 15px;
+}
+
+.no-users ul {
+  text-align: left;
+  max-width: 400px;
+  margin: 20px auto;
+  padding-left: 20px;
+}
+
+.no-users li {
+  margin: 8px 0;
+  color: #6b7280;
+}
+
+/* Retry Button */
+.retry-button {
+  background: linear-gradient(45deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 20px;
+}
+
+.retry-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
+}

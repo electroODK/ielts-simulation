@@ -9,6 +9,11 @@ const TestCreator = () => {
     sections: []
   });
 
+  // Отладочный useEffect для отслеживания изменений testData
+  React.useEffect(() => {
+    console.log('testData changed:', testData);
+  }, [testData]);
+
   const [currentSection, setCurrentSection] = useState(null);
   const [currentBlock, setCurrentBlock] = useState(null);
   const [activeTab, setActiveTab] = useState('listening');
@@ -1706,9 +1711,12 @@ const TestCreator = () => {
           <button onClick={() => addSection(activeTab)}>Добавить секцию {activeTab}</button>
         </div>
 
-        {testData.sections
-          .filter(section => section.type === activeTab)
-          .map((section, sectionIndex) => (
+        {(() => {
+          console.log('Rendering sections for activeTab:', activeTab);
+          console.log('All sections:', testData.sections);
+          const filteredSections = testData.sections.filter(section => section.type === activeTab);
+          console.log('Filtered sections:', filteredSections);
+          return filteredSections.map((section, sectionIndex) => (
           <div key={sectionIndex} className="section-editor">
             <h3>Секция: {section.type}</h3>
             <div className="section-actions">
@@ -1913,7 +1921,8 @@ const TestCreator = () => {
               </div>
             )}
           </div>
-        ))}
+        ));
+        })()}
       </div>
 
       <div className="save-section">

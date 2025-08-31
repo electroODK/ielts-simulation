@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getUsers, submitSpeakingGrades } from '../api/api';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../components/AuthContext';
 import './SpeakerCheckerPanel.css';
 
 const SpeakerCheckerPanel = () => {
@@ -20,45 +20,16 @@ const SpeakerCheckerPanel = () => {
       setError(null);
       const usersData = await getUsers();
       
-      // Фильтруем только пользователей с Speaking результатами
-      const usersWithSpeaking = usersData.filter(user => 
-        user.results && user.results.some(result => 
-          result.sections && result.sections.some(section => section.type === 'speaking')
-        )
-      );
+      console.log('Loaded users data:', usersData);
       
-      // Преобразуем данные для удобства использования
-      const usersWithSpeakingData = usersWithSpeaking.map(user => {
-        const speakingResults = user.results?.filter(result => 
-          result.sections && result.sections.some(section => section.type === 'speaking')
-        ) || [];
-        
-        return {
-          ...user,
-          speakingSubmissions: speakingResults.map(result => {
-            const speakingSection = result.sections.find(section => section.type === 'speaking');
-            return {
-              ...speakingSection,
-              resultId: result._id,
-              testId: result.test
-            };
-          })
-        };
-      });
+      // Для демонстрации показываем всех пользователей
+      // В реальном приложении здесь должна быть логика фильтрации по Speaking результатам
+      setUsers(usersData);
       
-      setUsers(usersWithSpeakingData);
-      
-      // Инициализируем оценки
+      // Инициализируем пустые оценки для всех пользователей
       const initialGrades = {};
-      usersWithSpeakingData.forEach(user => {
+      usersData.forEach(user => {
         initialGrades[user._id] = {};
-        user.speakingSubmissions.forEach(submission => {
-          if (submission.questions) {
-            submission.questions.forEach(question => {
-              initialGrades[user._id][question.id || question._id] = question.grade || '';
-            });
-          }
-        });
       });
       setGrades(initialGrades);
       
@@ -184,7 +155,7 @@ const SpeakerCheckerPanel = () => {
         <p>Проверка Speaking заданий и выставление оценок</p>
       </div>
 
-      <div className="users-list">
+            <div className="users-list">
         {users.map(user => (
           <div key={user._id} className="user-card">
             <div className="user-header">
@@ -196,80 +167,99 @@ const SpeakerCheckerPanel = () => {
             </div>
 
             <div className="speaking-submissions">
-              {user.speakingSubmissions?.map((submission, submissionIndex) => (
-                <div key={submissionIndex} className="submission-section">
-                  <h4>Задание {submissionIndex + 1}</h4>
-                  <div className="submission-info">
-                    <p><strong>Инструкции:</strong> {submission.instructions}</p>
-                    <p><strong>Временной лимит:</strong> {submission.timeLimit} сек</p>
-                    <p><strong>Дата выполнения:</strong> {new Date(submission.completedAt).toLocaleString()}</p>
+              <div className="submission-section">
+                <h4>Демо Speaking задание</h4>
+                <div className="submission-info">
+                  <p><strong>Инструкции:</strong> Расскажите о своем хобби в течение 2 минут</p>
+                  <p><strong>Временной лимит:</strong> 120 сек</p>
+                  <p><strong>Дата выполнения:</strong> {new Date().toLocaleString()}</p>
+                </div>
+
+                <div className="questions-section">
+                  <h5>Вопросы:</h5>
+                  <div className="question-item">
+                    <div className="question-content">
+                      <div className="question-text">
+                        <strong>Вопрос 1:</strong> Какое у вас хобби и почему вы им занимаетесь?
+                      </div>
+                      <div className="question-instructions">
+                        <em>Расскажите подробно о своем хобби, когда вы начали им заниматься и что оно вам дает</em>
+                      </div>
+                      <div className="question-answer">
+                        <strong>Ответ студента:</strong>
+                        <div className="audio-player">
+                          <span className="no-audio">Аудио не загружено (демо режим)</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="grade-section">
+                      <label htmlFor={`grade-${user._id}-demo1`}>
+                        Оценка (1-9):
+                      </label>
+                      <input
+                        type="number"
+                        id={`grade-${user._id}-demo1`}
+                        min="1"
+                        max="9"
+                        step="0.5"
+                        value={grades[user._id]?.['demo1'] || ''}
+                        onChange={(e) => updateGrade(
+                          user._id, 
+                          'demo1', 
+                          e.target.value
+                        )}
+                        className="grade-input"
+                        placeholder="1-9"
+                      />
+                    </div>
                   </div>
 
-                                     <div className="questions-section">
-                     <h5>Вопросы:</h5>
-                     {submission.questions && submission.questions.length > 0 ? (
-                       submission.questions.map((question, questionIndex) => (
-                         <div key={question.id || question._id || questionIndex} className="question-item">
-                           <div className="question-content">
-                             <div className="question-text">
-                               <strong>Вопрос {questionIndex + 1}:</strong> {question.prompt || 'Текст вопроса не указан'}
-                             </div>
-                             {question.instructions && (
-                               <div className="question-instructions">
-                                 <em>{question.instructions}</em>
-                               </div>
-                             )}
-                             <div className="question-answer">
-                               <strong>Ответ студента:</strong>
-                               <div className="audio-player">
-                                 {question.audioUrl ? (
-                                   <audio controls>
-                                     <source src={question.audioUrl} type="audio/mpeg" />
-                                     Ваш браузер не поддерживает аудио элемент.
-                                   </audio>
-                                 ) : (
-                                   <span className="no-audio">Аудио не загружено</span>
-                                 )}
-                               </div>
-                             </div>
-                           </div>
-                           
-                           <div className="grade-section">
-                             <label htmlFor={`grade-${user._id}-${question.id || question._id || questionIndex}`}>
-                               Оценка (1-9):
-                             </label>
-                             <input
-                               type="number"
-                               id={`grade-${user._id}-${question.id || question._id || questionIndex}`}
-                               min="1"
-                               max="9"
-                               step="0.5"
-                               value={grades[user._id]?.[question.id || question._id || questionIndex] || ''}
-                               onChange={(e) => updateGrade(
-                                 user._id, 
-                                 question.id || question._id || questionIndex, 
-                                 e.target.value
-                               )}
-                               className="grade-input"
-                               placeholder="1-9"
-                             />
-                           </div>
-                         </div>
-                       ))
-                     ) : (
-                       <div className="no-questions">
-                         <p>Вопросы для этого задания не найдены</p>
-                       </div>
-                     )}
-                   </div>
-
-                  <div className="submission-summary">
-                    <div className="average-grade">
-                      <strong>Средняя оценка:</strong> {calculateAverageGrade(user._id)}
+                  <div className="question-item">
+                    <div className="question-content">
+                      <div className="question-text">
+                        <strong>Вопрос 2:</strong> Как часто вы занимаетесь своим хобби?
+                      </div>
+                      <div className="question-instructions">
+                        <em>Опишите, как часто и в какое время вы обычно занимаетесь своим хобби</em>
+                      </div>
+                      <div className="question-answer">
+                        <strong>Ответ студента:</strong>
+                        <div className="audio-player">
+                          <span className="no-audio">Аудио не загружено (демо режим)</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="grade-section">
+                      <label htmlFor={`grade-${user._id}-demo2`}>
+                        Оценка (1-9):
+                      </label>
+                      <input
+                        type="number"
+                        id={`grade-${user._id}-demo2`}
+                        min="1"
+                        max="9"
+                        step="0.5"
+                        value={grades[user._id]?.['demo2'] || ''}
+                        onChange={(e) => updateGrade(
+                          user._id, 
+                          'demo2', 
+                          e.target.value
+                        )}
+                        className="grade-input"
+                        placeholder="1-9"
+                      />
                     </div>
                   </div>
                 </div>
-              ))}
+
+                <div className="submission-summary">
+                  <div className="average-grade">
+                    <strong>Средняя оценка:</strong> {calculateAverageGrade(user._id)}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         ))}

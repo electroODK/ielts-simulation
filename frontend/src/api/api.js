@@ -279,9 +279,21 @@ export const getAllResults = async () => {
  
  // опубликовать результат
  export const publishResult = async (id) => {
-   const { data } = await api.post(`/results/${id}/publish`);
-   return data;
- };
- 
- export default api;
+  const { data } = await api.post(`/results/${id}/publish`);
+  return data;
+};
+
+// ======================
+// 🤖 AI TRAI
+// ======================
+export const checkWritingWithTRAI = async (task1Text, task2Text, taskType = "both") => {
+  const { data } = await api.post('/ai/check-writing', {
+    task1Text,
+    task2Text,
+    taskType
+  });
+  return data;
+};
+
+export default api;
  

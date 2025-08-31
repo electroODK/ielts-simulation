@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getAllResults, updateResult, getUsers } from "../api/api";
+import { getAllResults, updateResult, getUsers, checkWritingWithTRAI } from "../api/api";
 import "./WritingCheckerPanel.css";
 
 const WritingCheckerPanel = () => {
@@ -7,6 +7,8 @@ const WritingCheckerPanel = () => {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedResult, setSelectedResult] = useState(null);
+  const [isTRAIChecking, setIsTRAIChecking] = useState(false);
+  const [traiResult, setTraiResult] = useState(null);
 
   const load = async () => {
     try {
@@ -36,6 +38,51 @@ const WritingCheckerPanel = () => {
     } catch (error) {
       alert('Ошибка при сохранении оценки: ' + error.message);
     }
+  };
+
+  const checkWithTRAI = async (task1Text, task2Text, taskType = "both") => {
+    setIsTRAIChecking(true);
+    setTraiResult(null);
+    
+    try {
+      const result = await checkWritingWithTRAI(task1Text, task2Text, taskType);
+      if (result.success) {
+        setTraiResult(result.data);
+        alert('TRAI успешно проверил работу!');
+      } else {
+        alert('Ошибка при проверке TRAI: ' + result.message);
+      }
+    } catch (error) {
+      alert('Ошибка при проверке TRAI: ' + error.message);
+    } finally {
+      setIsTRAIChecking(false);
+    }
+  };
+
+  const applyTRAIGrade = async (resultId) => {
+    if (!traiResult || !traiResult.overall_band) {
+      alert('Сначала получите оценку от TRAI');
+      return;
+    }
+
+    const comment = `TRAI оценка: ${traiResult.overall_band}/9
+
+Критерии:
+- Task Achievement: ${traiResult.criteria?.task_achievement || 'N/A'}
+- Coherence & Cohesion: ${traiResult.criteria?.coherence_cohesion || 'N/A'}
+- Lexical Resource: ${traiResult.criteria?.lexical_resource || 'N/A'}
+- Grammatical Range: ${traiResult.criteria?.grammatical_range || 'N/A'}
+
+Подробный анализ: ${traiResult.detailed_feedback || ''}
+
+Сильные стороны: ${(traiResult.strengths || []).join(', ')}
+
+Области для улучшения: ${(traiResult.areas_for_improvement || []).join(', ')}
+
+Рекомендации: ${traiResult.recommendations || ''}`;
+
+    await grade(resultId, traiResult.overall_band, comment);
+    setTraiResult(null);
   };
 
   const getUserResults = (userId) => {
@@ -117,6 +164,7 @@ const WritingCheckerPanel = () => {
             onClick={() => {
               setSelectedUser(null);
               setSelectedResult(null);
+              setTraiResult(null);
             }}
           >
             ← Назад к списку
@@ -143,32 +191,109 @@ const WritingCheckerPanel = () => {
                   </div>
                 </div>
 
-                                 <div className="writing-content">
-                   <h4>Writing Task 1:</h4>
-                   <div className="text-content">
-                     {result.writingSubmission?.task1Text || 'Нет данных'}
-                   </div>
-                   
-                   <h4>Writing Task 2:</h4>
-                   <div className="text-content">
-                     {result.writingSubmission?.task2Text || 'Нет данных'}
-                   </div>
-                 </div>
+                <div className="writing-content">
+                  <h4>Writing Task 1:</h4>
+                  <div className="text-content">
+                    {result.writingSubmission?.task1Text || 'Нет данных'}
+                  </div>
+                  
+                  <h4>Writing Task 2:</h4>
+                  <div className="text-content">
+                    {result.writingSubmission?.task2Text || 'Нет данных'}
+                  </div>
+                </div>
 
-                                 {result.writing?.comment && (
-                   <div className="existing-comment">
-                     <h4>Комментарий:</h4>
-                     <p>{result.writing.comment}</p>
-                     {result.writingSubmission?.reviewedAt && (
-                       <p className="review-info">
-                         Проверено: {new Date(result.writingSubmission.reviewedAt).toLocaleString('ru-RU')}
-                       </p>
-                     )}
-                   </div>
-                 )}
+                {result.writing?.comment && (
+                  <div className="existing-comment">
+                    <h4>Комментарий:</h4>
+                    <p>{result.writing.comment}</p>
+                    {result.writingSubmission?.reviewedAt && (
+                      <p className="review-info">
+                        Проверено: {new Date(result.writingSubmission.reviewedAt).toLocaleString('ru-RU')}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* TRAI Check Section */}
+                <div className="trai-check-section">
+                  <h4>🤖 Проверка TRAI</h4>
+                  <div className="trai-actions">
+                    <button 
+                      onClick={() => checkWithTRAI(
+                        result.writingSubmission?.task1Text,
+                        result.writingSubmission?.task2Text,
+                        "both"
+                      )}
+                      className="trai-check-button"
+                      disabled={isTRAIChecking}
+                    >
+                      {isTRAIChecking ? 'TRAI проверяет...' : 'TRAI проверит'}
+                    </button>
+                  </div>
+
+                  {traiResult && (
+                    <div className="trai-result">
+                      <div className="trai-score">
+                        <h5>Оценка TRAI: {traiResult.overall_band}/9</h5>
+                        {traiResult.criteria && Object.keys(traiResult.criteria).length > 0 && (
+                          <div className="trai-criteria">
+                            <p><strong>Task Achievement:</strong> {traiResult.criteria.task_achievement}</p>
+                            <p><strong>Coherence & Cohesion:</strong> {traiResult.criteria.coherence_cohesion}</p>
+                            <p><strong>Lexical Resource:</strong> {traiResult.criteria.lexical_resource}</p>
+                            <p><strong>Grammatical Range:</strong> {traiResult.criteria.grammatical_range}</p>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {traiResult.detailed_feedback && (
+                        <div className="trai-feedback">
+                          <h6>Подробный анализ:</h6>
+                          <p>{traiResult.detailed_feedback}</p>
+                        </div>
+                      )}
+
+                      {traiResult.strengths && traiResult.strengths.length > 0 && (
+                        <div className="trai-strengths">
+                          <h6>Сильные стороны:</h6>
+                          <ul>
+                            {traiResult.strengths.map((strength, index) => (
+                              <li key={index}>{strength}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {traiResult.areas_for_improvement && traiResult.areas_for_improvement.length > 0 && (
+                        <div className="trai-improvements">
+                          <h6>Области для улучшения:</h6>
+                          <ul>
+                            {traiResult.areas_for_improvement.map((area, index) => (
+                              <li key={index}>{area}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {traiResult.recommendations && (
+                        <div className="trai-recommendations">
+                          <h6>Рекомендации:</h6>
+                          <p>{traiResult.recommendations}</p>
+                        </div>
+                      )}
+
+                      <button 
+                        onClick={() => applyTRAIGrade(result._id)}
+                        className="apply-trai-grade-button"
+                      >
+                        Применить оценку TRAI
+                      </button>
+                    </div>
+                  )}
+                </div>
 
                 <div className="grading-section">
-                  <h4>Оценка:</h4>
+                  <h4>Ручная оценка:</h4>
                   <div className="band-selector">
                     <select 
                       value={selectedBand} 

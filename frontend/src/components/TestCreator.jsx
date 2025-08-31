@@ -15,6 +15,9 @@ const TestCreator = () => {
 
   // Добавить новую секцию
   const addSection = (sectionType) => {
+    console.log('addSection called:', { sectionType });
+    console.log('Current testData:', testData);
+    
     let newSection;
     
     if (sectionType === 'listening') {
@@ -54,6 +57,8 @@ const TestCreator = () => {
       };
     }
     
+    console.log('New section created:', newSection);
+    
     setTestData(prev => ({
       ...prev,
       sections: [...prev.sections, newSection]
@@ -63,6 +68,9 @@ const TestCreator = () => {
 
   // Добавить блок в выбранную секцию (по индексу)
   const addBlock = (sectionIndex, blockType) => {
+    console.log('addBlock called:', { sectionIndex, blockType });
+    console.log('Current testData:', testData);
+    
     let newBlock;
     
     if (blockType === 'speaking_questions') {
@@ -95,12 +103,15 @@ const TestCreator = () => {
       };
     }
 
+    console.log('New block created:', newBlock);
+
     const updatedSections = testData.sections.map((section, sIndex) =>
       sIndex === sectionIndex
         ? { ...section, blocks: [...section.blocks, newBlock] }
         : section
     );
 
+    console.log('Updated sections for block:', updatedSections);
     setTestData(prev => ({ ...prev, sections: updatedSections }));
     setCurrentBlock(newBlock);
   };
@@ -290,6 +301,9 @@ const TestCreator = () => {
 
   // Добавить вопрос в readingPart
   const addQuestionToReadingPart = (sectionIndex, partIndex, questionType) => {
+    console.log('addQuestionToReadingPart called:', { sectionIndex, partIndex, questionType });
+    console.log('Current testData:', testData);
+    
     let newQuestion;
     
     switch (questionType) {
@@ -348,6 +362,8 @@ const TestCreator = () => {
         };
     }
 
+    console.log('New question created:', newQuestion);
+
     const updatedSections = testData.sections.map((section, sIndex) =>
       sIndex === sectionIndex
         ? {
@@ -360,6 +376,8 @@ const TestCreator = () => {
           }
         : section
     );
+    
+    console.log('Updated sections:', updatedSections);
     setTestData(prev => ({ ...prev, sections: updatedSections }));
   };
 
@@ -427,6 +445,9 @@ const TestCreator = () => {
 
   // Добавить вопрос в Speaking блок
   const addQuestionToSpeakingBlock = (sectionIndex, blockIndex) => {
+    console.log('addQuestionToSpeakingBlock called:', { sectionIndex, blockIndex });
+    console.log('Current testData:', testData);
+    
     const newQuestion = {
       prompt: '',
       type: 'speaking',
@@ -434,6 +455,8 @@ const TestCreator = () => {
       timeLimit: 60,
       sampleAnswer: ''
     };
+
+    console.log('New speaking question created:', newQuestion);
 
     const updatedSections = testData.sections.map((section, sIndex) =>
       sIndex === sectionIndex
@@ -447,11 +470,16 @@ const TestCreator = () => {
           }
         : section
     );
+    
+    console.log('Updated sections for speaking:', updatedSections);
     setTestData(prev => ({ ...prev, sections: updatedSections }));
   };
 
   // Добавить вопрос в Writing блок
   const addQuestionToWritingBlock = (sectionIndex, blockIndex, partType) => {
+    console.log('addQuestionToWritingBlock called:', { sectionIndex, blockIndex, partType });
+    console.log('Current testData:', testData);
+    
     let newQuestion;
     
     if (partType === 'writing_part1') {
@@ -477,6 +505,8 @@ const TestCreator = () => {
       };
     }
 
+    console.log('New writing question created:', newQuestion);
+
     const updatedSections = testData.sections.map((section, sIndex) =>
       sIndex === sectionIndex
         ? {
@@ -489,6 +519,8 @@ const TestCreator = () => {
           }
         : section
     );
+    
+    console.log('Updated sections for writing:', updatedSections);
     setTestData(prev => ({ ...prev, sections: updatedSections }));
   };
 

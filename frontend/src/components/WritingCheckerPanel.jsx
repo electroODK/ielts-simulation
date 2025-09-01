@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getAllResults, updateResult, getUsers, checkWritingWithTRAI } from "../api/api";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "../components/AuthContext";
 import "./WritingCheckerPanel.css";
 
 const WritingCheckerPanel = () => {

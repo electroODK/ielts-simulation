@@ -12,7 +12,7 @@ const AdminPanel = () => {
   const [tests, setTests] = useState([]);
   const [results, setResults] = useState([]);
   const [assignments, setAssignments] = useState([]);
-  const [activeTab, setActiveTab] = useState('main');
+  const [activeTab, setActiveTab] = useState('dashboard');
 
   const [newUser, setNewUser] = useState({ username: "", password: "", role: "user" });
   const [newTest, setNewTest] = useState({ name: "", description: "" });

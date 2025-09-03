@@ -308,15 +308,21 @@ const TestRenderer = ({ test, onComplete }) => {
           </div>
         );
 
-      case 'speaking_questions':
+      case 'speaking_questions': {
+        const speakingItems = Array.isArray(block.speaking?.questions)
+          ? block.speaking.questions.map((q) => (typeof q === 'string' ? { prompt: q } : { prompt: String(q) }))
+          : Array.isArray(block.questions)
+            ? block.questions.map((q) => ({ prompt: q?.prompt || '' }))
+            : [];
+
         return (
           <div key={blockIndex} className="block-renderer speaking-block">
             <h3>{block.title}</h3>
             <p className="instructions">{block.instructions}</p>
             <div className="speaking-questions">
-              {block.speaking?.questions?.map((question, index) => (
+              {speakingItems.map((item, index) => (
                 <div key={index} className="speaking-question">
-                  <p className="question-text">{question}</p>
+                  <p className="question-text">{item.prompt}</p>
                   <div className="speaking-answer">
                     <textarea
                       placeholder="Подготовьте ваш ответ..."
@@ -330,6 +336,7 @@ const TestRenderer = ({ test, onComplete }) => {
             </div>
           </div>
         );
+      }
 
       default:
         return (
@@ -338,6 +345,334 @@ const TestRenderer = ({ test, onComplete }) => {
           </div>
         );
     }
+  };
+
+  const renderListeningSection = () => {
+    return (
+      <div className="listening-section">
+        {(currentSection.audioParts || []).map((part, partIndex) => (
+          <div key={partIndex} className="listening-part">
+            <h3>Part {part.index || partIndex + 1}</h3>
+            {part.audioUrl && (
+              <audio controls src={part.audioUrl} style={{ width: '100%' }} />
+            )}
+            <div className="questions-container">
+              {(part.questions || []).map((question, qIndex) => {
+                switch (question.type) {
+                  case 'mcq':
+                    return (
+                      <div key={qIndex} className="question-container">
+                        <p className="question-text">{question.prompt}</p>
+                        <div className="options-container">
+                          {(question.options || []).map((option, oIndex) => (
+                            <label key={oIndex} className="option-label">
+                              <input
+                                type="radio"
+                                name={`l_mcq_${partIndex}_${qIndex}`}
+                                value={option}
+                                checked={answers[`${currentSectionIndex}_${partIndex}_${qIndex}`] === option}
+                                onChange={(e) => setAnswers((prev) => ({ ...prev, [`${currentSectionIndex}_${partIndex}_${qIndex}`]: e.target.value }))}
+                              />
+                              <span className="option-text">{option}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  case 'tfng':
+                    return (
+                      <div key={qIndex} className="question-container">
+                        <p className="question-text">{question.prompt}</p>
+                        <div className="options-container">
+                          {['true', 'false', 'not_given'].map((option) => (
+                            <label key={option} className="option-label">
+                              <input
+                                type="radio"
+                                name={`l_tfng_${partIndex}_${qIndex}`}
+                                value={option}
+                                checked={answers[`${currentSectionIndex}_${partIndex}_${qIndex}`] === option}
+                                onChange={(e) => setAnswers((prev) => ({ ...prev, [`${currentSectionIndex}_${partIndex}_${qIndex}`]: e.target.value }))}
+                              />
+                              <span className="option-text">{option === 'true' ? 'True' : option === 'false' ? 'False' : 'Not Given'}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  case 'matching':
+                    return (
+                      <div key={qIndex} className="matching-container">
+                        <p className="instructions">{question.prompt}</p>
+                        <div className="left-column">
+                          {(question.leftItems || []).map((item, index) => (
+                            <div key={index} className="matching-item">
+                              <span className="item-number">{index + 1}.</span>
+                              <span className="item-text">{item}</span>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="right-column">
+                          {(question.rightItems || []).map((item, index) => (
+                            <div key={index} className="matching-item">
+                              <span className="item-letter">{String.fromCharCode(65 + index)}.</span>
+                              <span className="item-text">{item}</span>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="matching-answers">
+                          {(question.leftItems || []).map((_, index) => (
+                            <div key={index} className="answer-input">
+                              <span className="answer-label">{index + 1}.</span>
+                              <select
+                                value={answers[`${currentSectionIndex}_${partIndex}_matching_${index}`] || ''}
+                                onChange={(e) => setAnswers((prev) => ({ ...prev, [`${currentSectionIndex}_${partIndex}_matching_${index}`]: e.target.value }))}
+                              >
+                                <option value="">Выберите ответ</option>
+                                {(question.rightItems || []).map((_, rIndex) => (
+                                  <option key={rIndex} value={rIndex}>
+                                    {String.fromCharCode(65 + rIndex)}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  case 'table':
+                    return (
+                      <div key={qIndex} className="table-block">
+                        <p className="instructions">{question.prompt}</p>
+                        <table className="answer-table">
+                          <thead>
+                            <tr>
+                              <th></th>
+                              {(question.columns || []).map((col, index) => (
+                                <th key={index}>{col}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(question.rows || []).map((row, rowIndex) => (
+                              <tr key={rowIndex}>
+                                <td className="row-label">{row}</td>
+                                {(question.columns || []).map((_, colIndex) => (
+                                  <td key={colIndex}>
+                                    <input
+                                      type="checkbox"
+                                      checked={answers[`${currentSectionIndex}_${partIndex}_table_${rowIndex}_${colIndex}`] || false}
+                                      onChange={(e) => setAnswers((prev) => ({ ...prev, [`${currentSectionIndex}_${partIndex}_table_${rowIndex}_${colIndex}`]: e.target.checked }))}
+                                    />
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    );
+                  case 'gap':
+                    return (
+                      <div key={qIndex} className="gap-text-block">
+                        <p className="instructions">{question.prompt}</p>
+                        {(question.text || '').split(/\{\{gap\}\}/).map((part, idx, arr) => (
+                          <React.Fragment key={idx}>
+                            <span className="text-part">{part}</span>
+                            {idx < arr.length - 1 && (
+                              <input
+                                type="text"
+                                className="gap-input"
+                                placeholder="Введите ответ"
+                                value={answers[`${currentSectionIndex}_${partIndex}_gap_${idx}`] || ''}
+                                onChange={(e) => setAnswers((prev) => ({ ...prev, [`${currentSectionIndex}_${partIndex}_gap_${idx}`]: e.target.value }))}
+                              />
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    );
+                  default:
+                    return (
+                      <div key={qIndex} className="question-container">
+                        <p className="question-text">{question.prompt}</p>
+                        <input
+                          type="text"
+                          placeholder="Введите ответ"
+                          value={answers[`${currentSectionIndex}_${partIndex}_${qIndex}`] || ''}
+                          onChange={(e) => setAnswers((prev) => ({ ...prev, [`${currentSectionIndex}_${partIndex}_${qIndex}`]: e.target.value }))}
+                        />
+                      </div>
+                    );
+                }
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const renderReadingSection = () => {
+    return (
+      <div className="reading-section">
+        {(currentSection.readingParts || []).map((part, partIndex) => (
+          <div key={partIndex} className="reading-part">
+            <h3>{part.passageTitle || `Passage ${part.index || partIndex + 1}`}</h3>
+            {part.passageText && <p className="passage-text">{part.passageText}</p>}
+            <div className="questions-container">
+              {(part.questions || []).map((question, qIndex) => {
+                switch (question.type) {
+                  case 'mcq':
+                    return (
+                      <div key={qIndex} className="question-container">
+                        <p className="question-text">{question.prompt}</p>
+                        <div className="options-container">
+                          {(question.options || []).map((option, oIndex) => (
+                            <label key={oIndex} className="option-label">
+                              <input
+                                type="radio"
+                                name={`r_mcq_${partIndex}_${qIndex}`}
+                                value={option}
+                                checked={answers[`${currentSectionIndex}_${partIndex}_${qIndex}`] === option}
+                                onChange={(e) => setAnswers((prev) => ({ ...prev, [`${currentSectionIndex}_${partIndex}_${qIndex}`]: e.target.value }))}
+                              />
+                              <span className="option-text">{option}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  case 'tfng':
+                    return (
+                      <div key={qIndex} className="question-container">
+                        <p className="question-text">{question.prompt}</p>
+                        <div className="options-container">
+                          {['true', 'false', 'not_given'].map((option) => (
+                            <label key={option} className="option-label">
+                              <input
+                                type="radio"
+                                name={`r_tfng_${partIndex}_${qIndex}`}
+                                value={option}
+                                checked={answers[`${currentSectionIndex}_${partIndex}_${qIndex}`] === option}
+                                onChange={(e) => setAnswers((prev) => ({ ...prev, [`${currentSectionIndex}_${partIndex}_${qIndex}`]: e.target.value }))}
+                              />
+                              <span className="option-text">{option === 'true' ? 'True' : option === 'false' ? 'False' : 'Not Given'}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  case 'matching':
+                    return (
+                      <div key={qIndex} className="matching-container">
+                        <p className="instructions">{question.prompt}</p>
+                        <div className="left-column">
+                          {(question.leftItems || []).map((item, index) => (
+                            <div key={index} className="matching-item">
+                              <span className="item-number">{index + 1}.</span>
+                              <span className="item-text">{item}</span>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="right-column">
+                          {(question.rightItems || []).map((item, index) => (
+                            <div key={index} className="matching-item">
+                              <span className="item-letter">{String.fromCharCode(65 + index)}.</span>
+                              <span className="item-text">{item}</span>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="matching-answers">
+                          {(question.leftItems || []).map((_, index) => (
+                            <div key={index} className="answer-input">
+                              <span className="answer-label">{index + 1}.</span>
+                              <select
+                                value={answers[`${currentSectionIndex}_${partIndex}_matching_${index}`] || ''}
+                                onChange={(e) => setAnswers((prev) => ({ ...prev, [`${currentSectionIndex}_${partIndex}_matching_${index}`]: e.target.value }))}
+                              >
+                                <option value="">Выберите ответ</option>
+                                {(question.rightItems || []).map((_, rIndex) => (
+                                  <option key={rIndex} value={rIndex}>
+                                    {String.fromCharCode(65 + rIndex)}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  case 'table':
+                    return (
+                      <div key={qIndex} className="table-block">
+                        <p className="instructions">{question.prompt}</p>
+                        <table className="answer-table">
+                          <thead>
+                            <tr>
+                              <th></th>
+                              {(question.columns || []).map((col, index) => (
+                                <th key={index}>{col}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(question.rows || []).map((row, rowIndex) => (
+                              <tr key={rowIndex}>
+                                <td className="row-label">{row}</td>
+                                {(question.columns || []).map((_, colIndex) => (
+                                  <td key={colIndex}>
+                                    <input
+                                      type="checkbox"
+                                      checked={answers[`${currentSectionIndex}_${partIndex}_table_${rowIndex}_${colIndex}`] || false}
+                                      onChange={(e) => setAnswers((prev) => ({ ...prev, [`${currentSectionIndex}_${partIndex}_table_${rowIndex}_${colIndex}`]: e.target.checked }))}
+                                    />
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    );
+                  case 'gap':
+                    return (
+                      <div key={qIndex} className="gap-text-block">
+                        <p className="instructions">{question.prompt}</p>
+                        {(question.text || '').split(/\{\{gap\}\}/).map((part, idx, arr) => (
+                          <React.Fragment key={idx}>
+                            <span className="text-part">{part}</span>
+                            {idx < arr.length - 1 && (
+                              <input
+                                type="text"
+                                className="gap-input"
+                                placeholder="Введите ответ"
+                                value={answers[`${currentSectionIndex}_${partIndex}_gap_${idx}`] || ''}
+                                onChange={(e) => setAnswers((prev) => ({ ...prev, [`${currentSectionIndex}_${partIndex}_gap_${idx}`]: e.target.value }))}
+                              />
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    );
+                  default:
+                    return (
+                      <div key={qIndex} className="question-container">
+                        <p className="question-text">{question.prompt}</p>
+                        <input
+                          type="text"
+                          placeholder="Введите ответ"
+                          value={answers[`${currentSectionIndex}_${partIndex}_${qIndex}`] || ''}
+                          onChange={(e) => setAnswers((prev) => ({ ...prev, [`${currentSectionIndex}_${partIndex}_${qIndex}`]: e.target.value }))}
+                        />
+                      </div>
+                    );
+                }
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   };
 
   const renderGapText = (template, blockIndex) => {
@@ -384,7 +719,11 @@ const TestRenderer = ({ test, onComplete }) => {
       </div>
 
       <div className="section-content">
-        {currentSection.blocks.map((block, blockIndex) => renderBlock(block, blockIndex))}
+        {currentSection.type === 'listening'
+          ? renderListeningSection()
+          : currentSection.type === 'reading'
+            ? renderReadingSection()
+            : currentSection.blocks.map((block, blockIndex) => renderBlock(block, blockIndex))}
       </div>
 
       <div className="test-navigation">

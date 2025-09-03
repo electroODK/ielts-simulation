@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getUsers, submitSpeakingGrades } from '../api/api';
-<<<<<<< HEAD
 import { useAuth } from './AuthContext';
-=======
-import { useAuth } from '../components/AuthContext';
->>>>>>> c7c5664cb43ad12d2cee3cfae2f6b9ab975d6b6d
 import './SpeakerCheckerPanel.css';
 
 const SpeakerCheckerPanel = () => {

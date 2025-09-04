@@ -326,6 +326,66 @@ const TestCreator = () => {
     setTestData(prev => ({ ...prev, sections: updatedSections }));
   };
 
+  // Обновить правильные ответы для matching вопроса
+  const updateMatchingCorrectAnswer = (sectionIndex, partIndex, questionIndex, leftItemIndex, rightItemIndex) => {
+    const updatedSections = testData.sections.map((section, sIndex) =>
+      sIndex === sectionIndex
+        ? {
+            ...section,
+            audioParts: (section.audioParts || []).map((part, pIndex) =>
+              pIndex === partIndex
+                ? {
+                    ...part,
+                    questions: (part.questions || []).map((question, qIndex) =>
+                      qIndex === questionIndex && question.type === 'matching'
+                        ? {
+                            ...question,
+                            correctAnswersMap: {
+                              ...question.correctAnswersMap,
+                              [leftItemIndex]: rightItemIndex
+                            }
+                          }
+                        : question
+                    )
+                  }
+                : part
+            )
+          }
+        : section
+    );
+    setTestData(prev => ({ ...prev, sections: updatedSections }));
+  };
+
+  // Обновить правильные ответы для table вопроса
+  const updateTableCorrectAnswer = (sectionIndex, partIndex, questionIndex, rowIndex, colIndex, isCorrect) => {
+    const updatedSections = testData.sections.map((section, sIndex) =>
+      sIndex === sectionIndex
+        ? {
+            ...section,
+            audioParts: (section.audioParts || []).map((part, pIndex) =>
+              pIndex === partIndex
+                ? {
+                    ...part,
+                    questions: (part.questions || []).map((question, qIndex) =>
+                      qIndex === questionIndex && question.type === 'table'
+                        ? {
+                            ...question,
+                            correctAnswersMap: {
+                              ...question.correctAnswersMap,
+                              [`${rowIndex}_${colIndex}`]: isCorrect
+                            }
+                          }
+                        : question
+                    )
+                  }
+                : part
+            )
+          }
+        : section
+    );
+    setTestData(prev => ({ ...prev, sections: updatedSections }));
+  };
+
   // Добавить вопрос в readingPart
   const addQuestionToReadingPart = (sectionIndex, partIndex, questionType) => {
     console.log('addQuestionToReadingPart called:', { sectionIndex, partIndex, questionType });
@@ -439,6 +499,66 @@ const TestCreator = () => {
             readingParts: (section.readingParts || []).map((part, pIndex) =>
               pIndex === partIndex
                 ? { ...part, questions: (part.questions || []).filter((_, qIndex) => qIndex !== questionIndex) }
+                : part
+            )
+          }
+        : section
+    );
+    setTestData(prev => ({ ...prev, sections: updatedSections }));
+  };
+
+  // Обновить правильные ответы для matching вопроса в Reading
+  const updateReadingMatchingCorrectAnswer = (sectionIndex, partIndex, questionIndex, leftItemIndex, rightItemIndex) => {
+    const updatedSections = testData.sections.map((section, sIndex) =>
+      sIndex === sectionIndex
+        ? {
+            ...section,
+            readingParts: (section.readingParts || []).map((part, pIndex) =>
+              pIndex === partIndex
+                ? {
+                    ...part,
+                    questions: (part.questions || []).map((question, qIndex) =>
+                      qIndex === questionIndex && question.type === 'matching'
+                        ? {
+                            ...question,
+                            correctAnswersMap: {
+                              ...question.correctAnswersMap,
+                              [leftItemIndex]: rightItemIndex
+                            }
+                          }
+                        : question
+                    )
+                  }
+                : part
+            )
+          }
+        : section
+    );
+    setTestData(prev => ({ ...prev, sections: updatedSections }));
+  };
+
+  // Обновить правильные ответы для table вопроса в Reading
+  const updateReadingTableCorrectAnswer = (sectionIndex, partIndex, questionIndex, rowIndex, colIndex, isCorrect) => {
+    const updatedSections = testData.sections.map((section, sIndex) =>
+      sIndex === sectionIndex
+        ? {
+            ...section,
+            readingParts: (section.readingParts || []).map((part, pIndex) =>
+              pIndex === partIndex
+                ? {
+                    ...part,
+                    questions: (part.questions || []).map((question, qIndex) =>
+                      qIndex === questionIndex && question.type === 'table'
+                        ? {
+                            ...question,
+                            correctAnswersMap: {
+                              ...question.correctAnswersMap,
+                              [`${rowIndex}_${colIndex}`]: isCorrect
+                            }
+                          }
+                        : question
+                    )
+                  }
                 : part
             )
           }

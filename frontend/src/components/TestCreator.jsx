@@ -1531,60 +1531,7 @@ const TestCreator = () => {
           </div>
         );
 
-      case 'writing_part1':
-        return (
-          <div className="block-editor">
-            <h4>Writing Part 1</h4>
-            <input
-              placeholder="Заголовок блока"
-              value={block.title}
-              onChange={(e) => updateBlockField('title', e.target.value)}
-            />
-            <textarea
-              placeholder="Инструкции"
-              value={block.instructions}
-              onChange={(e) => updateBlockField('instructions', e.target.value)}
-            />
-            <div className="writing-editor">
-              <input
-                placeholder="URL изображения"
-                value={block.writing?.imageUrl || ''}
-                onChange={(e) => updateBlockField('writing', { ...block.writing, imageUrl: e.target.value })}
-              />
-              <textarea
-                placeholder="Текст задания"
-                value={block.writing?.prompt || ''}
-                onChange={(e) => updateBlockField('writing', { ...block.writing, prompt: e.target.value })}
-                rows={5}
-              />
-            </div>
-          </div>
-        );
 
-      case 'writing_part2':
-        return (
-          <div className="block-editor">
-            <h4>Writing Part 2</h4>
-            <input
-              placeholder="Заголовок блока"
-              value={block.title}
-              onChange={(e) => updateBlockField('title', e.target.value)}
-            />
-            <textarea
-              placeholder="Инструкции"
-              value={block.instructions}
-              onChange={(e) => updateBlockField('instructions', e.target.value)}
-            />
-            <div className="writing-editor">
-              <textarea
-                placeholder="Задание"
-                value={block.writing?.prompt || ''}
-                onChange={(e) => updateBlockField('writing', { ...block.writing, prompt: e.target.value })}
-                rows={5}
-              />
-            </div>
-          </div>
-        );
 
       case 'speaking_questions':
         return (

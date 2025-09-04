@@ -9,10 +9,7 @@ const TestCreator = () => {
     sections: []
   });
 
-  // Отладочный useEffect для отслеживания изменений testData
-  React.useEffect(() => {
-    console.log('testData changed:', testData);
-  }, [testData]);
+
 
   const [currentSection, setCurrentSection] = useState(null);
   const [currentBlock, setCurrentBlock] = useState(null);
@@ -20,8 +17,6 @@ const TestCreator = () => {
 
   // Добавить новую секцию
   const addSection = (sectionType) => {
-    console.log('addSection called:', { sectionType });
-    console.log('Current testData:', testData);
     
     let newSection;
     
@@ -62,8 +57,6 @@ const TestCreator = () => {
       };
     }
     
-    console.log('New section created:', newSection);
-    
     setTestData(prev => ({
       ...prev,
       sections: [...prev.sections, newSection]
@@ -73,8 +66,6 @@ const TestCreator = () => {
 
   // Добавить блок в выбранную секцию (по индексу)
   const addBlock = (sectionIndex, blockType) => {
-    console.log('addBlock called:', { sectionIndex, blockType });
-    console.log('Current testData:', testData);
     
     let newBlock;
     
@@ -108,15 +99,12 @@ const TestCreator = () => {
       };
     }
 
-    console.log('New block created:', newBlock);
-
     const updatedSections = testData.sections.map((section, sIndex) =>
       sIndex === sectionIndex
         ? { ...section, blocks: [...(section.blocks || []), newBlock] }
         : section
     );
 
-    console.log('Updated sections for block:', updatedSections);
     setTestData(prev => ({ ...prev, sections: updatedSections }));
     setCurrentBlock(newBlock);
   };
@@ -328,8 +316,6 @@ const TestCreator = () => {
 
   // Добавить вопрос в readingPart
   const addQuestionToReadingPart = (sectionIndex, partIndex, questionType) => {
-    console.log('addQuestionToReadingPart called:', { sectionIndex, partIndex, questionType });
-    console.log('Current testData:', testData);
     
     let newQuestion;
     
@@ -389,8 +375,6 @@ const TestCreator = () => {
         };
     }
 
-    console.log('New question created:', newQuestion);
-
     const updatedSections = testData.sections.map((section, sIndex) =>
       sIndex === sectionIndex
         ? {
@@ -404,7 +388,6 @@ const TestCreator = () => {
         : section
     );
     
-    console.log('Updated sections:', updatedSections);
     setTestData(prev => ({ ...prev, sections: updatedSections }));
   };
 
@@ -472,8 +455,6 @@ const TestCreator = () => {
 
   // Добавить вопрос в Speaking блок
   const addQuestionToSpeakingBlock = (sectionIndex, blockIndex) => {
-    console.log('addQuestionToSpeakingBlock called:', { sectionIndex, blockIndex });
-    console.log('Current testData:', testData);
     
     const newQuestion = {
       prompt: '',
@@ -482,8 +463,6 @@ const TestCreator = () => {
       timeLimit: 60,
       sampleAnswer: ''
     };
-
-    console.log('New speaking question created:', newQuestion);
 
     const updatedSections = testData.sections.map((section, sIndex) =>
       sIndex === sectionIndex
@@ -498,14 +477,11 @@ const TestCreator = () => {
         : section
     );
     
-    console.log('Updated sections for speaking:', updatedSections);
     setTestData(prev => ({ ...prev, sections: updatedSections }));
   };
 
   // Добавить вопрос в Writing блок
   const addQuestionToWritingBlock = (sectionIndex, blockIndex, partType) => {
-    console.log('addQuestionToWritingBlock called:', { sectionIndex, blockIndex, partType });
-    console.log('Current testData:', testData);
     
     let newQuestion;
     
@@ -532,8 +508,6 @@ const TestCreator = () => {
       };
     }
 
-    console.log('New writing question created:', newQuestion);
-
     const updatedSections = testData.sections.map((section, sIndex) =>
       sIndex === sectionIndex
         ? {
@@ -547,7 +521,6 @@ const TestCreator = () => {
         : section
     );
     
-    console.log('Updated sections for writing:', updatedSections);
     setTestData(prev => ({ ...prev, sections: updatedSections }));
   };
 
@@ -1116,55 +1089,7 @@ const TestCreator = () => {
           </div>
         );
 
-      case 'speaking_questions':
-        return (
-          <div className="block-editor">
-            <h4>Speaking Questions</h4>
-            <input
-              placeholder="Заголовок блока"
-              value={block.title}
-              onChange={(e) => updateBlockField('title', e.target.value)}
-            />
-            <textarea
-              placeholder="Инструкции"
-              value={block.instructions}
-              onChange={(e) => updateBlockField('instructions', e.target.value)}
-            />
-            <div className="questions-list">
-              {block.questions.map((question, qIndex) => (
-                <div key={qIndex} className="question-item">
-                  <input
-                    placeholder="Вопрос"
-                    value={question.prompt}
-                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'prompt', e.target.value)}
-                  />
-                  <textarea
-                    placeholder="Инструкции для студента"
-                    value={question.instructions}
-                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'instructions', e.target.value)}
-                    rows={3}
-                  />
-                  <input
-                    type="number"
-                    placeholder="Временной лимит (секунды)"
-                    value={question.timeLimit}
-                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'timeLimit', parseInt(e.target.value) || 60)}
-                  />
-                  <textarea
-                    placeholder="Пример ответа"
-                    value={question.sampleAnswer}
-                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'sampleAnswer', e.target.value)}
-                    rows={4}
-                  />
-                  <div>
-                    <button className="btn-danger" onClick={() => deleteQuestion(sectionIndex, blockIndex, qIndex)}>Удалить вопрос</button>
-                  </div>
-                </div>
-              ))}
-              <button onClick={() => addQuestionToSpeakingBlock(sectionIndex, blockIndex)}>Добавить вопрос</button>
-            </div>
-          </div>
-        );
+
 
       case 'writing_part1':
         return (
@@ -1606,60 +1531,7 @@ const TestCreator = () => {
           </div>
         );
 
-      case 'writing_part1':
-        return (
-          <div className="block-editor">
-            <h4>Writing Part 1</h4>
-            <input
-              placeholder="Заголовок блока"
-              value={block.title}
-              onChange={(e) => updateBlockField('title', e.target.value)}
-            />
-            <textarea
-              placeholder="Инструкции"
-              value={block.instructions}
-              onChange={(e) => updateBlockField('instructions', e.target.value)}
-            />
-            <div className="writing-editor">
-              <input
-                placeholder="URL изображения"
-                value={block.writing?.imageUrl || ''}
-                onChange={(e) => updateBlockField('writing', { ...block.writing, imageUrl: e.target.value })}
-              />
-              <textarea
-                placeholder="Текст задания"
-                value={block.writing?.prompt || ''}
-                onChange={(e) => updateBlockField('writing', { ...block.writing, prompt: e.target.value })}
-                rows={5}
-              />
-            </div>
-          </div>
-        );
 
-      case 'writing_part2':
-        return (
-          <div className="block-editor">
-            <h4>Writing Part 2</h4>
-            <input
-              placeholder="Заголовок блока"
-              value={block.title}
-              onChange={(e) => updateBlockField('title', e.target.value)}
-            />
-            <textarea
-              placeholder="Инструкции"
-              value={block.instructions}
-              onChange={(e) => updateBlockField('instructions', e.target.value)}
-            />
-            <div className="writing-editor">
-              <textarea
-                placeholder="Задание"
-                value={block.writing?.prompt || ''}
-                onChange={(e) => updateBlockField('writing', { ...block.writing, prompt: e.target.value })}
-                rows={5}
-              />
-            </div>
-          </div>
-        );
 
       case 'speaking_questions':
         return (
@@ -1733,12 +1605,7 @@ const TestCreator = () => {
           <button onClick={() => addSection(activeTab)}>Добавить секцию {activeTab}</button>
         </div>
 
-        {(() => {
-          console.log('Rendering sections for activeTab:', activeTab);
-          console.log('All sections:', testData.sections);
-          const filteredSections = testData.sections.filter(section => section.type === activeTab);
-          console.log('Filtered sections:', filteredSections);
-          return filteredSections.map((section, sectionIndex) => (
+        {testData.sections.filter(section => section.type === activeTab).map((section, sectionIndex) => (
           <div key={sectionIndex} className="section-editor">
             <h3>Секция: {section.type}</h3>
             <div className="section-actions">
@@ -1943,8 +1810,7 @@ const TestCreator = () => {
               </div>
             )}
           </div>
-        ));
-        })()}
+        ))}
       </div>
 
       <div className="save-section">

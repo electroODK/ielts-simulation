@@ -241,6 +241,17 @@ const TestCreator = () => {
           gaps: []
         };
         break;
+      case 'table_gaps':
+        newQuestion = {
+          id: `q_${Date.now()}`,
+          type: 'table_gaps',
+          prompt: '',
+          columns: [''],
+          rows: [''],
+          cells: {}, // Маппинг row_col -> 'text' или '{{gap}}'
+          correctAnswers: {} // Маппинг gap_index -> правильный ответ
+        };
+        break;
       default:
         newQuestion = {
           id: `q_${Date.now()}`,
@@ -438,6 +449,17 @@ const TestCreator = () => {
           prompt: '',
           text: '',
           gaps: []
+        };
+        break;
+      case 'table_gaps':
+        newQuestion = {
+          id: `q_${Date.now()}`,
+          type: 'table_gaps',
+          prompt: '',
+          columns: [''],
+          rows: [''],
+          cells: {}, // Маппинг row_col -> 'text' или '{{gap}}'
+          correctAnswers: {} // Маппинг gap_index -> правильный ответ
         };
         break;
       default:

@@ -1116,55 +1116,7 @@ const TestCreator = () => {
           </div>
         );
 
-      case 'speaking_questions':
-        return (
-          <div className="block-editor">
-            <h4>Speaking Questions</h4>
-            <input
-              placeholder="Заголовок блока"
-              value={block.title}
-              onChange={(e) => updateBlockField('title', e.target.value)}
-            />
-            <textarea
-              placeholder="Инструкции"
-              value={block.instructions}
-              onChange={(e) => updateBlockField('instructions', e.target.value)}
-            />
-            <div className="questions-list">
-              {block.questions.map((question, qIndex) => (
-                <div key={qIndex} className="question-item">
-                  <input
-                    placeholder="Вопрос"
-                    value={question.prompt}
-                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'prompt', e.target.value)}
-                  />
-                  <textarea
-                    placeholder="Инструкции для студента"
-                    value={question.instructions}
-                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'instructions', e.target.value)}
-                    rows={3}
-                  />
-                  <input
-                    type="number"
-                    placeholder="Временной лимит (секунды)"
-                    value={question.timeLimit}
-                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'timeLimit', parseInt(e.target.value) || 60)}
-                  />
-                  <textarea
-                    placeholder="Пример ответа"
-                    value={question.sampleAnswer}
-                    onChange={(e) => updateQuestion(sectionIndex, blockIndex, qIndex, 'sampleAnswer', e.target.value)}
-                    rows={4}
-                  />
-                  <div>
-                    <button className="btn-danger" onClick={() => deleteQuestion(sectionIndex, blockIndex, qIndex)}>Удалить вопрос</button>
-                  </div>
-                </div>
-              ))}
-              <button onClick={() => addQuestionToSpeakingBlock(sectionIndex, blockIndex)}>Добавить вопрос</button>
-            </div>
-          </div>
-        );
+
 
       case 'writing_part1':
         return (

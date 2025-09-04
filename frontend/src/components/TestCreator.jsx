@@ -567,6 +567,132 @@ const TestCreator = () => {
     setTestData(prev => ({ ...prev, sections: updatedSections }));
   };
 
+  // Обновить содержимое ячейки таблицы с пропусками для Reading
+  const updateReadingTableGapCell = (sectionIndex, partIndex, questionIndex, rowIndex, colIndex, cellType, content) => {
+    const updatedSections = testData.sections.map((section, sIndex) =>
+      sIndex === sectionIndex
+        ? {
+            ...section,
+            readingParts: (section.readingParts || []).map((part, pIndex) =>
+              pIndex === partIndex
+                ? {
+                    ...part,
+                    questions: (part.questions || []).map((question, qIndex) =>
+                      qIndex === questionIndex && question.type === 'table_gaps'
+                        ? {
+                            ...question,
+                            cells: {
+                              ...question.cells,
+                              [`${rowIndex}_${colIndex}`]: {
+                                type: cellType, // 'text' или 'gap'
+                                content: content // текст или пустая строка для gap
+                              }
+                            }
+                          }
+                        : question
+                    )
+                  }
+                : part
+            )
+          }
+        : section
+    );
+    setTestData(prev => ({ ...prev, sections: updatedSections }));
+  };
+
+  // Обновить правильный ответ для пропуска в таблице для Reading
+  const updateReadingTableGapAnswer = (sectionIndex, partIndex, questionIndex, gapIndex, answer) => {
+    const updatedSections = testData.sections.map((section, sIndex) =>
+      sIndex === sectionIndex
+        ? {
+            ...section,
+            readingParts: (section.readingParts || []).map((part, pIndex) =>
+              pIndex === partIndex
+                ? {
+                    ...part,
+                    questions: (part.questions || []).map((question, qIndex) =>
+                      qIndex === questionIndex && question.type === 'table_gaps'
+                        ? {
+                            ...question,
+                            correctAnswers: {
+                              ...question.correctAnswers,
+                              [gapIndex]: answer
+                            }
+                          }
+                        : question
+                    )
+                  }
+                : part
+            )
+          }
+        : section
+    );
+    setTestData(prev => ({ ...prev, sections: updatedSections }));
+  };
+
+  // Обновить содержимое ячейки таблицы с пропусками
+  const updateTableGapCell = (sectionIndex, partIndex, questionIndex, rowIndex, colIndex, cellType, content) => {
+    const updatedSections = testData.sections.map((section, sIndex) =>
+      sIndex === sectionIndex
+        ? {
+            ...section,
+            audioParts: (section.audioParts || []).map((part, pIndex) =>
+              pIndex === partIndex
+                ? {
+                    ...part,
+                    questions: (part.questions || []).map((question, qIndex) =>
+                      qIndex === questionIndex && question.type === 'table_gaps'
+                        ? {
+                            ...question,
+                            cells: {
+                              ...question.cells,
+                              [`${rowIndex}_${colIndex}`]: {
+                                type: cellType, // 'text' или 'gap'
+                                content: content // текст или пустая строка для gap
+                              }
+                            }
+                          }
+                        : question
+                    )
+                  }
+                : part
+            )
+          }
+        : section
+    );
+    setTestData(prev => ({ ...prev, sections: updatedSections }));
+  };
+
+  // Обновить правильный ответ для пропуска в таблице
+  const updateTableGapAnswer = (sectionIndex, partIndex, questionIndex, gapIndex, answer) => {
+    const updatedSections = testData.sections.map((section, sIndex) =>
+      sIndex === sectionIndex
+        ? {
+            ...section,
+            audioParts: (section.audioParts || []).map((part, pIndex) =>
+              pIndex === partIndex
+                ? {
+                    ...part,
+                    questions: (part.questions || []).map((question, qIndex) =>
+                      qIndex === questionIndex && question.type === 'table_gaps'
+                        ? {
+                            ...question,
+                            correctAnswers: {
+                              ...question.correctAnswers,
+                              [gapIndex]: answer
+                            }
+                          }
+                        : question
+                    )
+                  }
+                : part
+            )
+          }
+        : section
+    );
+    setTestData(prev => ({ ...prev, sections: updatedSections }));
+  };
+
   // Добавить вопрос в блок
   const addQuestion = (sectionIndex, blockIndex) => {
     const newQuestion = {
@@ -950,6 +1076,111 @@ const TestCreator = () => {
           </div>
         );
 
+      case 'table_gaps':
+        return (
+          <div className="question-editor">
+            <h5>Table Gaps Question</h5>
+            <input
+              placeholder="Инструкции"
+              value={question.prompt}
+              onChange={(e) => updateQuestionField('prompt', e.target.value)}
+            />
+            <div className="table-gaps-setup">
+              <div className="columns-setup">
+                <h6>Колонки:</h6>
+                {question.columns.map((col, index) => (
+                  <input
+                    key={index}
+                    placeholder={`Колонка ${index + 1}`}
+                    value={col}
+                    onChange={(e) => {
+                      const newColumns = [...question.columns];
+                      newColumns[index] = e.target.value;
+                      updateQuestionField('columns', newColumns);
+                    }}
+                  />
+                ))}
+                <button onClick={() => {
+                  const newColumns = [...question.columns, ''];
+                  updateQuestionField('columns', newColumns);
+                }}>Добавить колонку</button>
+              </div>
+              <div className="rows-setup">
+                <h6>Строки:</h6>
+                {question.rows.map((row, index) => (
+                  <input
+                    key={index}
+                    placeholder={`Строка ${index + 1}`}
+                    value={row}
+                    onChange={(e) => {
+                      const newRows = [...question.rows];
+                      newRows[index] = e.target.value;
+                      updateQuestionField('rows', newRows);
+                    }}
+                  />
+                ))}
+                <button onClick={() => {
+                  const newRows = [...question.rows, ''];
+                  updateQuestionField('rows', newRows);
+                }}>Добавить строку</button>
+              </div>
+              
+              <div className="table-cells-editor">
+                <h6>Содержимое ячеек:</h6>
+                <table className="cells-table">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      {question.columns.map((col, colIndex) => (
+                        <th key={colIndex}>{col || `Колонка ${colIndex + 1}`}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {question.rows.map((row, rowIndex) => (
+                      <tr key={rowIndex}>
+                        <td className="row-label">{row || `Строка ${rowIndex + 1}`}</td>
+                        {question.columns.map((_, colIndex) => {
+                          const cellKey = `${rowIndex}_${colIndex}`;
+                          const cell = question.cells?.[cellKey] || { type: 'text', content: '' };
+                          
+                          return (
+                            <td key={colIndex} className="cell-editor">
+                              <select
+                                value={cell.type}
+                                onChange={(e) => updateTableGapCell(sectionIndex, partIndex, questionIndex, rowIndex, colIndex, e.target.value, cell.content)}
+                              >
+                                <option value="text">Текст</option>
+                                <option value="gap">{{gap}}</option>
+                              </select>
+                              {cell.type === 'text' && (
+                                <input
+                                  type="text"
+                                  placeholder="Введите текст"
+                                  value={cell.content}
+                                  onChange={(e) => updateTableGapCell(sectionIndex, partIndex, questionIndex, rowIndex, colIndex, 'text', e.target.value)}
+                                />
+                              )}
+                              {cell.type === 'gap' && (
+                                <input
+                                  type="text"
+                                  placeholder="Правильный ответ"
+                                  value={question.correctAnswers?.[cellKey] || ''}
+                                  onChange={(e) => updateTableGapAnswer(sectionIndex, partIndex, questionIndex, cellKey, e.target.value)}
+                                />
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        );
+
       case 'gap':
         return (
           <div className="question-editor">
@@ -1141,6 +1372,111 @@ const TestCreator = () => {
                   const newRows = [...question.rows, ''];
                   updateQuestionField('rows', newRows);
                 }}>Добавить строку</button>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'table_gaps':
+        return (
+          <div className="question-editor">
+            <h5>Table Gaps Question</h5>
+            <input
+              placeholder="Инструкции"
+              value={question.prompt}
+              onChange={(e) => updateQuestionField('prompt', e.target.value)}
+            />
+            <div className="table-gaps-setup">
+              <div className="columns">
+                <h6>Колонки:</h6>
+                {question.columns.map((col, index) => (
+                  <input
+                    key={index}
+                    placeholder={`Колонка ${index + 1}`}
+                    value={col}
+                    onChange={(e) => {
+                      const newCols = [...question.columns];
+                      newCols[index] = e.target.value;
+                      updateQuestionField('columns', newCols);
+                    }}
+                  />
+                ))}
+                <button onClick={() => {
+                  const newCols = [...question.columns, ''];
+                  updateQuestionField('columns', newCols);
+                }}>Добавить колонку</button>
+              </div>
+              <div className="rows">
+                <h6>Строки:</h6>
+                {question.rows.map((row, index) => (
+                  <input
+                    key={index}
+                    placeholder={`Строка ${index + 1}`}
+                    value={row}
+                    onChange={(e) => {
+                      const newRows = [...question.rows];
+                      newRows[index] = e.target.value;
+                      updateQuestionField('rows', newRows);
+                    }}
+                  />
+                ))}
+                <button onClick={() => {
+                  const newRows = [...question.rows, ''];
+                  updateQuestionField('rows', newRows);
+                }}>Добавить строку</button>
+              </div>
+              
+              <div className="table-cells-editor">
+                <h6>Содержимое ячеек:</h6>
+                <table className="cells-table">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      {question.columns.map((col, colIndex) => (
+                        <th key={colIndex}>{col || `Колонка ${colIndex + 1}`}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {question.rows.map((row, rowIndex) => (
+                      <tr key={rowIndex}>
+                        <td className="row-label">{row || `Строка ${rowIndex + 1}`}</td>
+                        {question.columns.map((_, colIndex) => {
+                          const cellKey = `${rowIndex}_${colIndex}`;
+                          const cell = question.cells?.[cellKey] || { type: 'text', content: '' };
+                          
+                          return (
+                            <td key={colIndex} className="cell-editor">
+                              <select
+                                value={cell.type}
+                                onChange={(e) => updateReadingTableGapCell(sectionIndex, partIndex, questionIndex, rowIndex, colIndex, e.target.value, cell.content)}
+                              >
+                                <option value="text">Текст</option>
+                                <option value="gap">{{gap}}</option>
+                              </select>
+                              {cell.type === 'text' && (
+                                <input
+                                  type="text"
+                                  placeholder="Введите текст"
+                                  value={cell.content}
+                                  onChange={(e) => updateReadingTableGapCell(sectionIndex, partIndex, questionIndex, rowIndex, colIndex, 'text', e.target.value)}
+                                />
+                              )}
+                              {cell.type === 'gap' && (
+                                <input
+                                  type="text"
+                                  placeholder="Правильный ответ"
+                                  value={question.correctAnswers?.[cellKey] || ''}
+                                  onChange={(e) => updateReadingTableGapAnswer(sectionIndex, partIndex, questionIndex, cellKey, e.target.value)}
+                                />
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -1824,6 +2160,7 @@ const TestCreator = () => {
                       <button onClick={() => addQuestionToAudioPart(sectionIndex, partIndex, 'tfng')}>True/False/Not Given</button>
                       <button onClick={() => addQuestionToAudioPart(sectionIndex, partIndex, 'matching')}>Matching</button>
                       <button onClick={() => addQuestionToAudioPart(sectionIndex, partIndex, 'table')}>Table</button>
+                      <button onClick={() => addQuestionToAudioPart(sectionIndex, partIndex, 'table_gaps')}>Table Gaps</button>
                       <button onClick={() => addQuestionToAudioPart(sectionIndex, partIndex, 'gap')}>Gap Fill</button>
                       <button onClick={() => addQuestionToAudioPart(sectionIndex, partIndex, 'short')}>Short Answer</button>
                     </div>
@@ -1903,6 +2240,7 @@ const TestCreator = () => {
                       <button onClick={() => addQuestionToReadingPart(sectionIndex, partIndex, 'tfng')}>True/False/Not Given</button>
                       <button onClick={() => addQuestionToReadingPart(sectionIndex, partIndex, 'matching')}>Matching</button>
                       <button onClick={() => addQuestionToReadingPart(sectionIndex, partIndex, 'table')}>Table</button>
+                      <button onClick={() => addQuestionToReadingPart(sectionIndex, partIndex, 'table_gaps')}>Table Gaps</button>
                       <button onClick={() => addQuestionToReadingPart(sectionIndex, partIndex, 'gap')}>Gap Fill</button>
                       <button onClick={() => addQuestionToReadingPart(sectionIndex, partIndex, 'short')}>Short Answer</button>
                     </div>

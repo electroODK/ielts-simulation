@@ -6,6 +6,7 @@ import api from "../api/api";
 import { getAllResults, updateResult, finalizeResult, publishResult } from "../api/api";
 import TestCreator from "./TestCreator";
 import TestDemo from "./TestDemo";
+import SpeakingCheckerPanel from "./SpeakingCheckerPanel";
 
 const AdminPanel = () => {
   const [users, setUsers] = useState([]);
@@ -99,6 +100,7 @@ const AdminPanel = () => {
         <button 
           onClick={() => setActiveTab('testDemo')} 
           style={{ 
+            marginRight: 10,
             padding: '10px 20px',
             backgroundColor: activeTab === 'testDemo' ? '#3498db' : '#ecf0f1',
             color: activeTab === 'testDemo' ? 'white' : '#2c3e50',
@@ -109,12 +111,27 @@ const AdminPanel = () => {
         >
           Демо тестов
         </button>
+        <button 
+          onClick={() => setActiveTab('speakingChecker')} 
+          style={{ 
+            padding: '10px 20px',
+            backgroundColor: activeTab === 'speakingChecker' ? '#3498db' : '#ecf0f1',
+            color: activeTab === 'speakingChecker' ? 'white' : '#2c3e50',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer'
+          }}
+        >
+          🎤 Speaking Checker
+        </button>
       </div>
 
       {activeTab === 'testCreator' ? (
         <TestCreator />
       ) : activeTab === 'testDemo' ? (
         <TestDemo />
+      ) : activeTab === 'speakingChecker' ? (
+        <SpeakingCheckerPanel />
       ) : (
         <>
           <section>

@@ -721,9 +721,7 @@ const TestRenderer = ({ test, onComplete }) => {
       <div className="section-content">
         {currentSection.type === 'listening'
           ? renderListeningSection()
-          : currentSection.type === 'reading'
-            ? renderReadingSection()
-            : currentSection.blocks.map((block, blockIndex) => renderBlock(block, blockIndex))}
+          : currentSection.blocks.map((block, blockIndex) => renderBlock(block, blockIndex))}
       </div>
 
       <div className="test-navigation">
